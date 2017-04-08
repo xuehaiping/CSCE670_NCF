@@ -1,3 +1,32 @@
+## Implementation details
+
+### embedding layer
+- input -> embedding is a fully connected layer
+- we build 4 embeddings, user-MLP, user-GMF, movie-MLP, movie-GMF
+- if MLP is 3 layers, then embedding length is 2x predictive factors (see [evaluation](### evaluation))
+### MLP
+- ReLu activation
+- each higher layer has 1/2 the number of units
+- 3 hidden layers
+- last layer is lenth of predictive factors
+    - each earlier layer is 2x the previous
+
+### GMF
+
+### total system
+- pretrain GMF and MLP
+- ADAM during pretraining, vanilla SGD after
+
+### evaluation
+- leave one out evaluation
+- randomly sample 100 items not interacted by the user, and rank the test item among 100 items
+- Hit rate and NDCG
+- random sample 1 interaction for each user as validation data, and tune hyper-parameters on it
+- sample four negative instance per positive instance
+- last layer of NCF = predictive factors, evaluated at [8,16,32,64]
+
+
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/xuehaiping/CSCE670_NCF/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
