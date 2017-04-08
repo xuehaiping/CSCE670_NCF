@@ -16,7 +16,7 @@
 ### GMF
 - Input latent vectors (embeddings)
 - The mapping function of the first layer is the dot product multiplied by edge weights h
-    -h is learned from data with the log loss 
+- h is learned from data with the log loss (binary cross-entropy loss) 
 - Activation function: Sigmoid function
 
 ### Total system
