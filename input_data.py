@@ -46,7 +46,7 @@ movies = set()
 users = []
 
 # read data from ratings.csv, userId, movieId, timestamp
-file_path = 'ratings.csv'
+file_path = 'data/movielens/ratings.csv'
 ##create user dictionary
 with open(file_path, 'rb') as f:
     f.readline()
@@ -73,8 +73,11 @@ interact_mx = interaction_matrix(user_dict, movies, users)
 #create one hot matrix for user
 one_hot_user = one_hot_vector(users)
 #create one hot matrix for movies
-one_hot_user = one_hot_vector(movies)
+one_hot_movies = one_hot_vector(movies)
 
+np.save('interaction_mx', interact_mx)
+np.save('one_hot_user', one_hot_user)
+np.save('one_hot_movies', one_hot_movies)
 
 # In[ ]:
 
