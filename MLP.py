@@ -25,7 +25,7 @@ def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size)
 
 
 num_predictive_factors = 8
-batch_size = 10
+batch_size = 765
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
@@ -61,3 +61,6 @@ model.fit_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx,
                     verbose=1)
 #result = model.predict_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
 #                        steps = 1)
+
+model.save('MLP.h5')
+
