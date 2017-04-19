@@ -3,8 +3,10 @@ from keras.layers import Dense, Activation,Embedding,Input,concatenate,multiply
 import numpy as np
 import keras.layers as layers
 
+
+
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
-    if interactions_matrix.size % batch_size != 0:
+    if (interactions_matrix.size - len(users_matrix[0])) % batch_size != 0:
         print(str(interactions_matrix.size) + 'is not divisible by ' + str(batch_size))
         raise StandardError
     users = []
@@ -13,15 +15,18 @@ def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size)
     while True:
         for user_idx, user in enumerate(users_matrix):
             for item_idx, item in enumerate(items_matrix):
-                users.append(user)
-                items.append(item)
-                interactions.append(interactions_matrix[user_idx][item_idx])
+                if interactions_matrix[user_idx][item_idx] != -1:
+                    users.append(user)
+                    items.append(item)
+                    interactions.append(interactions_matrix[user_idx][item_idx])
                 if len(users) == batch_size:
                     yield ({'user_input': np.array(users), 'item_input': np.array(items)},
                            np.array(interactions))
                     users = []
                     items = []
                     interactions = []
+
+                    
 
 
 num_predictive_factors = 8
