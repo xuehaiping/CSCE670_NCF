@@ -84,7 +84,7 @@ interact_mx = interaction_matrix(user_dict, movies, users)
 #create one hot matrix for user
 one_hot_user = one_hot_vector(users)
 #create one hot matrix for movies
-one_hot_user = one_hot_vector(movies)
+one_hot_movies = one_hot_vector(movies)
 #add negative one to the interaction matrix
 add_neg_one(test_user, interact_mx, movies, users)
 
