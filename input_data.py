@@ -1,14 +1,4 @@
-
-# coding: utf-8
-
-# In[12]:
-
-from keras.layers import Input, Dense, Activation
-from keras.models import Model
 import numpy as np
-
-
-# In[46]:
 
 #create index dictionary for an list
 def idx_dict(array):
@@ -35,6 +25,14 @@ def one_hot_vector(array):
         one_vector[i][i] = 1
     return one_vector
 
+##add -1 to indicate the (user, movie) pair are used for testing purpose                    
+def add_neg_one(test_dict, int_mx, movs, usrs):
+    movie_idx_dict = idx_dict(movs)
+    user_idx_dict = idx_dict(usrs)
+    for usr in test_dict:
+        if usr in user_idx_dict:
+            int_mx[user_idx_dict[usr]][movie_idx_dict[test_dict[usr]]] = -1
+        
 
 # In[47]:
 
@@ -44,24 +42,37 @@ user_dict = {}
 movies = set()
 #user_list
 users = []
+#test dictionary
+test_user = {}
 
 # read data from ratings.csv, userId, movieId, timestamp
-file_path = 'data/movielens/ratings.csv'
+file_path = 'ratings.csv'
+
 ##create user dictionary
 with open(file_path, 'rb') as f:
     f.readline()
-    for i in range(1,40000):
+    for i in range(1,200):
         data = f.readline().split(",")
         #add movie to movie list
         if int(data[1]) not in movies:
             movies.add(int(data[1]))   
         #add data into dictionary
         if int(data[0]) in user_dict:
-            user_dict[int(data[0])].add(int(data[1]))
+            user_dict[int(data[0])].append( (int(data[1]), int(data[3])))
         else:
-            user_dict[int(data[0])] = set()
-            user_dict[int(data[0])].add(int(data[1]))
+            user_dict[int(data[0])] = list()
+            user_dict[int(data[0])].append((int(data[1]), int(data[3])))
 f.close()
+
+
+#pick out the lastest movie the user watch and add it to test dictionary
+for user in user_dict:
+    movie_list = sorted(user_dict[user], key=lambda movie: movie[1], reverse=True)
+    test_user[user] = movie_list[0][0]
+    movie_list.pop(0)
+    movie_list = [movie[0] for movie in movie_list]
+    user_dict[user] = set(movie_list)
+    
 
 #convert it back to list
 movies = list(movies)
@@ -74,16 +85,11 @@ interact_mx = interaction_matrix(user_dict, movies, users)
 one_hot_user = one_hot_vector(users)
 #create one hot matrix for movies
 one_hot_movies = one_hot_vector(movies)
+#add negative one to the interaction matrix
+add_neg_one(test_user, interact_mx, movies, users)
+
 
 np.save('interaction_mx', interact_mx)
 np.save('one_hot_user', one_hot_user)
 np.save('one_hot_movies', one_hot_movies)
-
-# In[ ]:
-
-
-
-
-
-
 
