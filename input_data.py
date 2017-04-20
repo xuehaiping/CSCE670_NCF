@@ -30,9 +30,9 @@ def add_neg_one(test_dict, int_mx, movs, usrs):
     movie_idx_dict = idx_dict(movs)
     user_idx_dict = idx_dict(usrs)
     for usr in test_dict:
-        int_mx[user_idx_dict[usr]][movie_idx_dict[test_dict[usr]]] = -1
- 
-
+        if usr in user_idx_dict:
+            int_mx[user_idx_dict[usr]][movie_idx_dict[test_dict[usr]]] = -1
+        
 
 # In[47]:
 
