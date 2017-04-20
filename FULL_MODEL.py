@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 from keras.models import Model
 from keras.layers import Dense, Activation,Embedding,Input,concatenate, multiply
@@ -9,7 +9,7 @@ import numpy as np
 import keras.layers as layers
 
 
-# In[2]:
+# In[4]:
 
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
     if (interactions_matrix.size % batch_size) != 0:
@@ -34,12 +34,27 @@ def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size)
                     interactions = []
 
 
-# In[3]:
+# In[31]:
 
-#TODO: Load pretrained weights
+def load_weights(model):
+    model.get_layer('MLP_user_embed').set_weights(np.load('mlp_user_embed_weights.npy'))
+    model.get_layer('MLP_item_embed').set_weights(np.load('mlp_item_embed_weights.npy'))
+    
+    mlp1_0 = np.load('mlp_1_weights_array0.npy')
+    mlp1_1 = np.load('mlp_1_weights_array1.npy')    
+    model.get_layer('mlp_1').set_weights([mlp1_0,mlp1_1])
+    
+    model.get_layer('mlp_2').set_weights(np.load('mlp_2_weights.npy'))
+    model.get_layer('mlp_3').set_weights(np.load('mlp_3_weights.npy'))
+
+    model.get_layer('GMF_user_embed').set_weights(np.load('GMF_user_embed.npy'))
+    model.get_layer('GMF_item_embed').set_weights(np.load('GMF_item_embed.npy'))
+    model.get_layer('GMF_layer').set_weights(np.load('GMF_output_layer.npy'))
+    
+    return model
 
 
-# In[4]:
+# In[32]:
 
 num_predictive_factors = 8
 batch_size = 1
@@ -48,9 +63,7 @@ one_hot_movies = np.load('one_hot_movies.npy')
 interaction_mx = np.load('interaction_mx.npy')
 
 
-# In[6]:
-
-#TODO: Feed layers with pretrained weights for MLP and GMF
+# In[34]:
 
 #----- MLP Model -----
 user_input = Input(shape=(len(one_hot_users),),name='user_input')
@@ -63,6 +76,7 @@ MLP_merged_embed = concatenate([MLP_user_embed, MLP_item_embed], axis=1)
 mlp_1 = Dense(32, activation='relu',name='mlp_1')(MLP_merged_embed)
 mlp_2 = Dense(16, activation='relu',name='mlp_2')(mlp_1)
 mlp_3 = Dense(8, activation='relu',name='mlp_3')(mlp_2) #This will be the input for the final layer
+MLP_main_output = Dense(1, activation='sigmoid',name='MLP_main_output')(mlp_3)
 
 #----- GMF Model -----
 GMF_user_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name='GMF_user_embed')(user_input)
@@ -70,23 +84,24 @@ GMF_item_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name='G
 
 GMF_merged_embed = multiply([GMF_user_embed, GMF_item_embed])
 
-GMF_layer = Dense(8, activation='sigmoid',name='GMF_layer')(GMF_merged_embed)
+GMF_layer = Dense(1, activation='sigmoid',name='GMF_layer')(GMF_merged_embed)
 
-#TODO: Concatenate with GMF last layer
+#Concatenate with GMF last layer
 #MLP_input = Input(shape=(len(one_hot_users),),name='MLP_input') #This may be necessary
-gmf_mlp_concatenated = concatenate([mlp_3, GMF_layer], axis=1);
+gmf_mlp_concatenated = concatenate([MLP_main_output, GMF_layer], axis=1);
 
 
-#TODO: Feed previous concatenate to NeuMF Layer
-NeuMF = Dense(16, activation='relu', name='NeuMF')(gmf_mlp_concatenated)
+#Feed previous concatenate to NeuMF Layer
+NeuMF = Dense(2, activation='relu', name='NeuMF')(gmf_mlp_concatenated)
 NeuMF_main_output = Dense(1, activation='sigmoid',name='NeuMF_main_output')(NeuMF)
 
 model = Model(inputs=[user_input, item_input], output=NeuMF_main_output)
+
+model = load_weights(model)
+
 model.compile(optimizer='sgd',
               loss='binary_crossentropy',
               metrics=['accuracy'])
-
-
 
 
 # In[ ]:
