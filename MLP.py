@@ -2,11 +2,11 @@ from keras.models import Model
 from keras.layers import Dense, Activation,Embedding,Input,concatenate
 import numpy as np
 import keras.layers as layers
+import operator
 
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
     if interactions_matrix.size % batch_size != 0:
-        print(str(interactions_matrix.size) + 'is not divisible by ' + str(batch_size))
-        raise StandardError
+        raise StandardError(str(interactions_matrix.size) + 'is not divisible by ' + str(batch_size))
     users = []
     items = []
     interactions = []
@@ -23,9 +23,46 @@ def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size)
                     items = []
                     interactions = []
 
+def generate_one_hot(id, total):
+    vector = np.zeros(total, dtype=np.int8)
+    vector[id] = 1
+    return vector
+
+def hit_rate(sorted_predictions, target):
+    movies = [int(i[0]) for i in sorted_predictions]
+    if target in movies:
+        return True
+
+def evalulate(interactions_matrix, model, metric):
+    summation = 0
+    for idx, user in enumerate(interactions_matrix):
+        zero_indices = np.where(user == 0)[0]
+        random_indices = np.random.shuffle(zero_indices)[0:100]
+        latest_movie = np.where(user < 0)[0]
+        all_indices = np.append(random_indices, latest_movie)
+        # generate user one-hot
+        user_one_hot = generate_one_hot(idx, interactions_matrix.shape[0])
+        user_vectors = np.repeat([user_one_hot], interactions_matrix.shape[1])
+        # generate movie one-hots
+        movie_vectors = []
+        for movie in all_indices:
+            movie_vectors.append(generate_one_hot(movie, interactions_matrix.shape[1]))
+        predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
+        # TODO: make sure axis is correct
+        #predictions_idx = np.concatenate(([all_indices],[predictions]), axis = 0)
+        predictions_idx = dict(zip(all_indices, predictions))
+        sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1))[0:10]
+        if metric == 'hit_rate':
+            if hit_rate(sorted_predictions, idx):
+                summation += 1
+        elif metric == 'ndcg':
+            summation += 1
+        else:
+            raise StandardError('metric has to be "hit_rate" or "ndcg"')
+    return summation / float(interactions_matrix.shape[0])
 
 num_predictive_factors = 8
-batch_size = 10
+batch_size = 765
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
