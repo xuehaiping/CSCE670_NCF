@@ -7,7 +7,7 @@ import keras.layers as layers
 
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
     if (interactions_matrix.size - len(users_matrix[0])) % batch_size != 0:
-        print(str(interactions_matrix.size) + 'is not divisible by ' + str(batch_size))
+        print(str(interactions_matrix.size - len(users_matrix[0])) + 'is not divisible by ' + str(batch_size))
         raise StandardError
     users = []
     items = []
