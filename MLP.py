@@ -10,9 +10,9 @@ batch_size = 1
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
-one_hot_users = np.load('one_hot_user.npy')
-one_hot_movies = np.load('one_hot_movies.npy')
-interaction_mx = np.load('interaction_mx.npy')
+one_hot_users = np.load('input/one_hot_user.npy')
+one_hot_movies = np.load('input/one_hot_movies.npy')
+interaction_mx = np.load('input/interaction_mx.npy')
 
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
 user_input = Input(shape=(len(one_hot_users),),name='user_input')
@@ -43,10 +43,10 @@ model.fit_generator(helper.preprocess_data(one_hot_users,one_hot_movies,interact
 #Save weights for full_model
 #Save weights for full_model
 wmlp1= model.get_layer('mlp_1').get_weights()
-np.save('mlp_1_weights_array0', wmlp1[0])
-np.save('mlp_1_weights_array1', wmlp1[1])
-np.save('mlp_2_weights',model.get_layer('mlp_2').get_weights());
-np.save('mlp_3_weights',model.get_layer('mlp_3').get_weights());
-np.save('mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
-np.save('mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());
+np.save('MLP_WE/mlp_1_weights_array0', wmlp1[0])
+np.save('MLP_WE/mlp_1_weights_array1', wmlp1[1])
+np.save('MLP_WE/mlp_2_weights',model.get_layer('mlp_2').get_weights());
+np.save('MLP_WE/mlp_3_weights',model.get_layer('mlp_3').get_weights());
+np.save('MLP_WE/mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
+np.save('MLP_WE/mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());
 

@@ -34,9 +34,9 @@ batch_size = 2
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
-one_hot_users = np.load('one_hot_user.npy')
-one_hot_movies = np.load('one_hot_movies.npy')
-interaction_mx = np.load('interaction_mx.npy')
+one_hot_users = np.load('input/one_hot_user.npy')
+one_hot_movies = np.load('input/one_hot_movies.npy')
+interaction_mx = np.load('input/interaction_mx.npy')
 
 #users, items, interactions = preprocess_data(one_hot_users,one_hot_movies,interaction_mx)
 
@@ -69,6 +69,6 @@ user_embed_weights = model.get_layer('user_embed').get_weights()
 item_embed_weights = model.get_layer('item_embed').get_weights()
 main_output_weights = model.get_layer('main_output').get_weights()
 
-np.save('GMF_user_embed.npy', user_embed_weights)
-np.save('GMF_item_embed.npy', item_embed_weights)
-np.save('GMF_output_layer.npy', main_output_weights)
+np.save('GMF_WE/GMF_user_embed.npy', user_embed_weights)
+np.save('GMF_WE/GMF_item_embed.npy', item_embed_weights)
+np.save('GMF_WE/GMF_output_layer.npy', main_output_weights)
