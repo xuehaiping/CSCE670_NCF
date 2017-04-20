@@ -48,10 +48,11 @@ one_hot_movies = np.load('one_hot_movies.npy')
 interaction_mx = np.load('interaction_mx.npy')
 
 
-# In[5]:
+# In[6]:
 
-#TODO: Feed layers with pretrained weights
+#TODO: Feed layers with pretrained weights for MLP and GMF
 
+#----- MLP Model -----
 MLP_user_input = Input(shape=(len(one_hot_users),),name='MLP_user_input')
 MLP_item_input = Input(shape=(len(one_hot_movies),),name='MLP_item_input')
 
@@ -63,8 +64,10 @@ mlp_1 = Dense(32, activation='relu',name='mlp_1')(MLP_merged_embed)
 mlp_2 = Dense(16, activation='relu',name='mlp_2')(mlp_1)
 mlp_3 = Dense(8, activation='relu',name='mlp_3')(mlp_2) #This will be the input for the final layer
 
+#----- GMF Model -----
+#TODO: Concatenate with GMF last layer
+#gmf_mlp_concatenated = concatenate([mlp_3, mlp_last_layer], axis=1);
 
-#TODO: Concatenate mlp_3 with GMF last layer
 
 #TODO: Feed previous concatenate to NeuMF Layer
 
