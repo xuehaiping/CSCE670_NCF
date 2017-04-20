@@ -1,15 +1,12 @@
 
 # coding: utf-8
 
-# In[3]:
+# In[6]:
 
 from keras.models import Model
 from keras.layers import Dense, Activation,Embedding,Input,concatenate, multiply
 import numpy as np
 import keras.layers as layers
-
-
-# In[4]:
 
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
     if (interactions_matrix.size % batch_size) != 0:
@@ -34,36 +31,29 @@ def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size)
                     interactions = []
 
 
-# In[31]:
-
 def load_weights(model):
-    model.get_layer('MLP_user_embed').set_weights(np.load('mlp_user_embed_weights.npy'))
-    model.get_layer('MLP_item_embed').set_weights(np.load('mlp_item_embed_weights.npy'))
+    model.get_layer('MLP_user_embed').set_weights(np.load('MLP_WE/mlp_user_embed_weights.npy'))
+    model.get_layer('MLP_item_embed').set_weights(np.load('MLP_WE/mlp_item_embed_weights.npy'))
     
-    mlp1_0 = np.load('mlp_1_weights_array0.npy')
-    mlp1_1 = np.load('mlp_1_weights_array1.npy')    
+    mlp1_0 = np.load('MLP_WE/mlp_1_weights_array0.npy')
+    mlp1_1 = np.load('MLP_WE/mlp_1_weights_array1.npy')    
     model.get_layer('mlp_1').set_weights([mlp1_0,mlp1_1])
     
-    model.get_layer('mlp_2').set_weights(np.load('mlp_2_weights.npy'))
-    model.get_layer('mlp_3').set_weights(np.load('mlp_3_weights.npy'))
+    model.get_layer('mlp_2').set_weights(np.load('MLP_WE/mlp_2_weights.npy'))
+    model.get_layer('mlp_3').set_weights(np.load('MLP_WE/mlp_3_weights.npy'))
 
-    model.get_layer('GMF_user_embed').set_weights(np.load('GMF_user_embed.npy'))
-    model.get_layer('GMF_item_embed').set_weights(np.load('GMF_item_embed.npy'))
-    model.get_layer('GMF_layer').set_weights(np.load('GMF_output_layer.npy'))
+    model.get_layer('GMF_user_embed').set_weights(np.load('GMF_WE/GMF_user_embed.npy'))
+    model.get_layer('GMF_item_embed').set_weights(np.load('GMF_WE/GMF_item_embed.npy'))
+    model.get_layer('GMF_layer').set_weights(np.load('GMF_WE/GMF_output_layer.npy'))
     
     return model
 
 
-# In[32]:
-
 num_predictive_factors = 8
 batch_size = 1
-one_hot_users = np.load('one_hot_user.npy')
-one_hot_movies = np.load('one_hot_movies.npy')
-interaction_mx = np.load('interaction_mx.npy')
-
-
-# In[34]:
+one_hot_users = np.load('input/one_hot_user.npy')
+one_hot_movies = np.load('input/one_hot_movies.npy')
+interaction_mx = np.load('input/interaction_mx.npy')
 
 #----- MLP Model -----
 user_input = Input(shape=(len(one_hot_users),),name='user_input')
@@ -102,9 +92,5 @@ model = load_weights(model)
 model.compile(optimizer='sgd',
               loss='binary_crossentropy',
               metrics=['accuracy'])
-
-
-# In[ ]:
-
 
 
