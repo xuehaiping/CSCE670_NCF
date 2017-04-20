@@ -89,7 +89,7 @@ one_hot_movies = one_hot_vector(movies)
 add_neg_one(test_user, interact_mx, movies, users)
 
 
-np.save('interaction_mx', interact_mx)
-np.save('one_hot_user', one_hot_user)
-np.save('one_hot_movies', one_hot_movies)
+np.save('input/interaction_mx', interact_mx)
+np.save('input/one_hot_user', one_hot_user)
+np.save('input/one_hot_movies', one_hot_movies)
 
