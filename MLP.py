@@ -62,4 +62,12 @@ model.fit_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx,
 #result = model.predict_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
 #                        steps = 1)
 
-
+#Save weights for full_model
+#Save weights for full_model
+wmlp1= model.get_layer('mlp_1').get_weights()
+np.save('mlp_1_weights_array0', wmlp1[0])
+np.save('mlp_1_weights_array1', wmlp1[1])
+np.save('mlp_2_weights',model.get_layer('mlp_2').get_weights());
+np.save('mlp_3_weights',model.get_layer('mlp_3').get_weights());
+np.save('mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
+np.save('mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());
