@@ -46,13 +46,13 @@ users = []
 test_user = {}
 
 # read data from ratings.csv, userId, movieId, timestamp
-file_path = 'ratings.csv'
+file_path = 'data/movielens/ratings.dat'
 
 ##create user dictionary
 with open(file_path, 'rb') as f:
     f.readline()
     for i in range(1,200):
-        data = f.readline().split(",")
+        data = f.readline().split("::")
         #add movie to movie list
         if int(data[1]) not in movies:
             movies.add(int(data[1]))   
