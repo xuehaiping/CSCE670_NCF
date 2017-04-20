@@ -45,9 +45,8 @@ interaction_mx = np.load('interaction_mx.npy')
 user_input = Input(shape=(len(one_hot_users),),name='user_input')
 item_input = Input(shape=(len(one_hot_movies),),name='item_input')
 
-user_embed = Dense(num_predictive_factors * 2, activation='sigmoid')(user_input)
-item_embed = Dense(num_predictive_factors * 2, activation='sigmoid')(item_input)
-
+user_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name = 'user_embed')(user_input)
+item_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name = 'item_embed')(item_input)
 merged_embed = multiply([user_embed, item_embed])
 
 main_output = Dense(1, activation='sigmoid',name='main_output')(merged_embed)
@@ -66,4 +65,10 @@ model.fit_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx,
 #result = model.predict_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
 #                       steps = 1)
 
-print "notebook"
+user_embed_weights = model.get_layer('user_embed').get_weights()
+item_embed_weights = model.get_layer('item_embed').get_weights()
+main_output_weights = model.get_layer('main_output').get_weights()
+
+np.save('GMF_user_embed.npy', user_embed_weights)
+np.save('GMF_item_embed.npy', item_embed_weights)
+np.save('GMF_output_layer.npy', main_output_weights)
