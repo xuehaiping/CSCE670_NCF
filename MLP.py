@@ -1,68 +1,10 @@
 from keras.models import Model
-from keras.layers import Dense, Activation,Embedding,Input,concatenate
+from keras.layers import Dense, Input,concatenate
 import numpy as np
-import keras.layers as layers
-import operator
-
-def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
-    if interactions_matrix.size % batch_size != 0:
-        raise StandardError(str(interactions_matrix.size) + 'is not divisible by ' + str(batch_size))
-    users = []
-    items = []
-    interactions = []
-    while True:
-        for user_idx, user in enumerate(users_matrix):
-            for item_idx, item in enumerate(items_matrix):
-                users.append(user)
-                items.append(item)
-                interactions.append(interactions_matrix[user_idx][item_idx])
-                if len(users) == batch_size:
-                    yield ({'user_input': np.array(users), 'item_input': np.array(items)},
-                           np.array(interactions))
-                    users = []
-                    items = []
-                    interactions = []
-
-def generate_one_hot(id, total):
-    vector = np.zeros(total, dtype=np.int8)
-    vector[id] = 1
-    return vector
-
-def hit_rate(sorted_predictions, target):
-    movies = [int(i[0]) for i in sorted_predictions]
-    if target in movies:
-        return True
-
-def evalulate(interactions_matrix, model, metric):
-    summation = 0
-    for idx, user in enumerate(interactions_matrix):
-        zero_indices = np.where(user == 0)[0]
-        random_indices = np.random.shuffle(zero_indices)[0:100]
-        latest_movie = np.where(user < 0)[0]
-        all_indices = np.append(random_indices, latest_movie)
-        # generate user one-hot
-        user_one_hot = generate_one_hot(idx, interactions_matrix.shape[0])
-        user_vectors = np.repeat([user_one_hot], interactions_matrix.shape[1])
-        # generate movie one-hots
-        movie_vectors = []
-        for movie in all_indices:
-            movie_vectors.append(generate_one_hot(movie, interactions_matrix.shape[1]))
-        predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
-        # TODO: make sure axis is correct
-        #predictions_idx = np.concatenate(([all_indices],[predictions]), axis = 0)
-        predictions_idx = dict(zip(all_indices, predictions))
-        sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1))[0:10]
-        if metric == 'hit_rate':
-            if hit_rate(sorted_predictions, idx):
-                summation += 1
-        elif metric == 'ndcg':
-            summation += 1
-        else:
-            raise StandardError('metric has to be "hit_rate" or "ndcg"')
-    return summation / float(interactions_matrix.shape[0])
+import ncf_helper as helper
 
 num_predictive_factors = 8
-batch_size = 765
+batch_size = 684
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
@@ -70,31 +12,23 @@ one_hot_users = np.load('one_hot_user.npy')
 one_hot_movies = np.load('one_hot_movies.npy')
 interaction_mx = np.load('interaction_mx.npy')
 
-#users, items, interactions = preprocess_data(one_hot_users,one_hot_movies,interaction_mx)
-
-
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
 user_input = Input(shape=(len(one_hot_users),),name='user_input')
 item_input = Input(shape=(len(one_hot_movies),),name='item_input')
-#user_embed = Embedding(2, num_predictive_factors * 2, input_length=len(one_hot_users))(user_input)
-#item_embed = Embedding(2, num_predictive_factors * 2, input_length=len(one_hot_movies))(item_input)
 user_embed = Dense(num_predictive_factors * 2, activation='sigmoid')(user_input)
 item_embed = Dense(num_predictive_factors * 2, activation='sigmoid')(item_input)
 merged_embed = concatenate([user_embed, item_embed], axis=1)
 mlp_1 = Dense(32, activation='relu')(merged_embed)
 mlp_2 = Dense(16, activation='relu')(mlp_1)
 mlp_3 = Dense(8, activation='relu')(mlp_2)
-main_output = Dense(1, activation='sigmoid',name='main_output')(mlp_3)
+main_output = Dense(1, activation='sigmoid', name='main_output')(mlp_3)
 
 model = Model(inputs=[user_input, item_input], output=main_output)
 model.compile(optimizer='Adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
-#model.fit([users, items], interactions,epochs=50, batch_size=32)
 
-model.fit_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
+model.fit_generator(helper.preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
                     steps_per_epoch=interaction_mx.size/batch_size,
                     epochs=10,
                     verbose=1)
-#result = model.predict_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
-#                        steps = 1)
