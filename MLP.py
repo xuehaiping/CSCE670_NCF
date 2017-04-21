@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Dense, Input,concatenate
+from keras.layers import Dense, Input,concatenate, Flatten, Embedding
 import numpy as np
 import ncf_helper as helper
 
@@ -10,18 +10,14 @@ batch_size = 1
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 # load data
-one_hot_users = np.load('input/one_hot_user.npy')
-one_hot_movies = np.load('input/one_hot_movies.npy')
-interaction_mx = np.load('input/interaction_mx.npy')
+inputs, labels = helper.training_data_generation('input/one_training_data')
 
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
-user_input = Input(shape=(len(one_hot_users),),name='user_input')
-item_input = Input(shape=(len(one_hot_movies),),name='item_input')
-
-#user_embed = Embedding(2, num_predictive_factors * 2, input_length=len(one_hot_users))(user_input)
-#item_embed = Embedding(2, num_predictive_factors * 2, input_length=len(one_hot_movies))(item_input)
-user_embed = Dense(num_predictive_factors * 2, activation='sigmoid',name='MLP_user_embed')(user_input)
-item_embed = Dense(num_predictive_factors * 2, activation='sigmoid',name='MLP_item_embed')(item_input)
+user_input = Input(shape=(1,),name='user_input')
+#item_input = Input(shape=(len(one_hot_movies),),name='item_input')
+item_input = Input(shape=(1,),name='item_input')
+user_embed = Flatten()(Embedding(len(inputs['user_input']) + 1, num_predictive_factors * 2, input_length=1)(user_input))
+item_embed = Flatten()(Embedding(len(inputs['item_input']) + 1, num_predictive_factors * 2, input_length=1)(item_input))
 merged_embed = concatenate([user_embed, item_embed], axis=1)
 mlp_1 = Dense(32, activation='relu', name='mlp_1')(merged_embed)
 mlp_2 = Dense(16, activation='relu', name='mlp_2')(mlp_1)
@@ -33,12 +29,7 @@ model.compile(optimizer='Adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit_generator(helper.preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
-                    steps_per_epoch=interaction_mx.size/batch_size,
-                    epochs=10,
-                    verbose=1)
-#result = model.predict_generator(preprocess_data(one_hot_users,one_hot_movies,interaction_mx, batch_size),
-#                        steps = 1)
+model.fit(inputs, labels, batch_size = 64, epochs = 10)
 
 #Save weights for full_model
 #Save weights for full_model
