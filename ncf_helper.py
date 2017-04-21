@@ -27,6 +27,19 @@ def generate_one_hot(id, total):
     vector[id] = 1.0
     return vector
 
+#this block's functions are all used for training data generation
+def training_data_generation(fname,int_mx = None):
+    user_in = []
+    movie_in = []
+    labels = []
+    with open(fname, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            data = line.split(',')
+            user_in.append(int(data[0]))
+            movie_in.append(int(data[1]))
+            labels.append(1)
+    return {'user_input': np.array(user_in), 'item_input': np.array(movie_in)},np.array(labels)
 
 def hit_rate(sorted_predictions, target):
     movies = [int(i[0]) for i in sorted_predictions]
