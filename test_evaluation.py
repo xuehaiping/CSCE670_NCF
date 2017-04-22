@@ -6,5 +6,5 @@ import ncf_helper as helper
 
 model = load_model('MLP_for_eval.h5')
 interaction_mx = np.load('interaction_mx.npy')
-test = helper.evaluate(interaction_mx, model, 'hit_rate')
+test = helper.evaluate_integer_input('one_testing_data',interaction_mx, model, 'hit_rate')
 print('accuracy rate of: ' + str(test))
