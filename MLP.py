@@ -5,13 +5,11 @@ import ncf_helper as helper
 
 num_predictive_factors = 8
 
-batch_size = 1
-
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
 interaction_mx = np.load('input/int_mat.npy')
 # load data
-inputs, labels = helper.training_data_generation('input/one_training_data',interaction_mx, 5)
+inputs, labels = helper.training_data_generation('input/training_data.npy',interaction_mx, 5)
 
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
 user_input = Input(shape=(1,),name='user_input')
@@ -30,15 +28,17 @@ model.compile(optimizer='Adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(inputs, labels, batch_size = 64, epochs = 10)
+model.fit(inputs, labels, batch_size = 256, epochs = 7)
 
 #Save weights for full_model
 #Save weights for full_model
+model.save('MLP_integer_input')
+
 wmlp1= model.get_layer('mlp_1').get_weights()
 np.save('MLP_WE/mlp_1_weights_array0', wmlp1[0])
 np.save('MLP_WE/mlp_1_weights_array1', wmlp1[1])
-np.save('MLP_WE/mlp_2_weights',model.get_layer('mlp_2').get_weights());
-np.save('MLP_WE/mlp_3_weights',model.get_layer('mlp_3').get_weights());
-np.save('MLP_WE/mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
-np.save('MLP_WE/mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());
+np.save('MLP_WE/mlp_2_weights',model.get_layer('mlp_2').get_weights())
+np.save('MLP_WE/mlp_3_weights',model.get_layer('mlp_3').get_weights())
+np.save('MLP_WE/mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights())
+np.save('MLP_WE/mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights())
 

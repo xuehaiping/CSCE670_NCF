@@ -95,13 +95,13 @@ def evaluate(fname, model, metric,interactions_matrix = None):
 
 def evaluate_integer_input(fname, model, metric, interactions_matrix):
     target_movies = []
-    with open(fname, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            data = line.split(',')
-            target_movies.append(int(data[1]))
+    int_matrix = np.load(interactions_matrix)
+    int_matrix = np.delete(int_matrix, 0, 0)
+    lines = np.load(fname)
+    for line in lines:
+        target_movies.append(line[1])
     summation = 0
-    for idx, user in enumerate(interactions_matrix):
+    for idx, user in enumerate(int_matrix):
         # pick 100 random non-interacted movies
         zero_indices = np.where(user == 0)[0]
         np.random.shuffle(zero_indices)
@@ -114,7 +114,7 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
         # TODO: make sure axis is correct
         predictions_idx = dict(zip(movie_vectors, predictions))
-        sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1))[0:10]
+        sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:10]
         if metric == 'hit_rate':
             if hit_rate(sorted_predictions, idx):
                 summation += 1
@@ -123,4 +123,4 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
             summation += 1
         else:
             raise StandardError('metric has to be "hit_rate" or "ndcg"')
-    return summation / float(interactions_matrix.shape[0])
+    return summation/float(int_matrix.shape[0])
