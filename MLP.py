@@ -9,8 +9,9 @@ batch_size = 1
 
 # embedding size is 2 * num_predictive_factors if MLP is 3 layered
 
+interaction_mx = np.load('input/int_mat.npy')
 # load data
-inputs, labels = helper.training_data_generation('input/one_training_data')
+inputs, labels = helper.training_data_generation('input/one_training_data',interaction_mx, 5)
 
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
 user_input = Input(shape=(1,),name='user_input')
