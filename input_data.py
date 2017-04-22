@@ -90,26 +90,24 @@ users = user_dict.keys()
 row_num = max(users) + 1
 column_num = max(movies) + 1
 
+#training data
+user_item_pair = []
+for usr in user_dict:
+    for mov in list(user_dict[usr]):
+        user_item_pair.append([usr,mov])
 
-
-#open a training file for writing
-with open('input/one_training_data','w+') as tf:
-    #append interacted [user,movie,label] pair to the training data
-    for usr in user_dict:
-        for mov in list(user_dict[usr]):
-            tf.write("%s\n" % (str(usr)+','+str(mov)))
-tf.close()
-
-#open a training file for writing
-with open('input/one_testing_data','w+') as tt:
-    #append interacted [user,movie,label] pair to the training data
-    for usr in test_user:
-        tt.write("%s\n" % (str(usr)+','+str(test_user[usr])))
-tt.close()
-
+#testing data
+test_pair = []
+for usr in test_user:
+    test_pair.append([usr,test_user[usr]])
+        
 #interaction matrix
 int_mat = interaction_matrix(user_dict,row_num,column_num)
 #add test data in the interaction matrix
 add_one(test_user,int_mat)
 #save the interaction matrix numpy
 np.save('input/int_mat', int_mat)
+#save user movie pair for training
+np.save('input/training_data', user_item_pair)
+#save user movie pair for testing 
+np.save('input/testing_data', test_pair)
