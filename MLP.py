@@ -56,10 +56,10 @@ model.fit(inputs, labels, batch_size = 256, epochs = 2)
 
 #Save weights for full_model
 #Save weights for full_model
-#wmlp1= model.get_layer('mlp_1').get_weights()
-#np.save('MLP_WE/mlp_1_weights_array0', wmlp1[0])
-#np.save('MLP_WE/mlp_1_weights_array1', wmlp1[1])
-#np.save('MLP_WE/mlp_2_weights',model.get_layer('mlp_2').get_weights());
-#np.save('MLP_WE/mlp_3_weights',model.get_layer('mlp_3').get_weights());
-#np.save('MLP_WE/mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
-#np.save('MLP_WE/mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());
+wmlp1= model.get_layer('mlp_1').get_weights()
+np.save('MLP_WE/mlp_1_weights_array0', wmlp1[0])
+np.save('MLP_WE/mlp_1_weights_array1', wmlp1[1])
+np.save('MLP_WE/mlp_2_weights',model.get_layer('mlp_2').get_weights());
+np.save('MLP_WE/mlp_3_weights',model.get_layer('mlp_3').get_weights());
+np.save('MLP_WE/mlp_user_embed_weights',model.get_layer('MLP_user_embed').get_weights());
+np.save('MLP_WE/mlp_item_embed_weights',model.get_layer('MLP_item_embed').get_weights());

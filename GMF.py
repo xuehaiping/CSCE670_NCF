@@ -3,6 +3,8 @@ from keras.layers import Dense, Activation,Embedding,Input,concatenate,multiply,
 import numpy as np
 import ncf_helper as helper
 import keras.layers as layers
+from keras import initializers
+
 
 num_predictive_factors = 8
 batch_size = 2
@@ -10,14 +12,24 @@ batch_size = 2
 
 # load data
 inputs, labels = helper.training_data_generation('input/training_data.npy','int_mat.npy',5)
-
+interaction_mx = np.load('input/int_mat.npy')
 
 #https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
 user_input = Input(shape=(1,),name='user_input')
 item_input = Input(shape=(1,),name='item_input')
 
-user_embed = Flatten()(Embedding(len(inputs['user_input']) + 1, num_predictive_factors * 2, input_length=1)(user_input))
-item_embed = Flatten()(Embedding(len(inputs['item_input']) + 1, num_predictive_factors * 2, input_length=1)(item_input))
+user_embed = Flatten()(Embedding(interaction_mx.shape[0] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(user_input))
+item_embed = Flatten()(Embedding(interaction_mx.shape[1] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(item_input))
 merged_embed = multiply([user_embed, item_embed])
 
 main_output = Dense(1, activation='sigmoid',name='main_output')(merged_embed)
@@ -27,7 +39,7 @@ model.compile(optimizer='Adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(inputs, labels, batch_size = 64, epochs = 10)
+model.fit(inputs, labels, batch_size = 256, epochs = 2)
 
 user_embed_weights = model.get_layer('user_embed').get_weights()
 item_embed_weights = model.get_layer('item_embed').get_weights()
