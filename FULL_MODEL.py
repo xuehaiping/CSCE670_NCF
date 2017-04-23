@@ -4,32 +4,13 @@
 # In[6]:
 
 from keras.models import Model
-from keras.layers import Dense, Activation,Embedding,Input,concatenate, multiply
+from keras.layers import Dense, Activation,Embedding,Input,concatenate, multiply,Flatten
 import numpy as np
 import keras.layers as layers
-
-def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
-    if (interactions_matrix.size % batch_size) != 0:
-        print(str(interactions_matrix.size - len(users_matrix[0])) + 'is not divisible by ' + str(batch_size))
-        raise StandardError
-        
-    users = []
-    items = []
-    interactions = []
-    while True:
-        for user_idx, user in enumerate(users_matrix):
-            for item_idx, item in enumerate(items_matrix):
-                if interactions_matrix[user_idx][item_idx] != -1:
-                    users.append(user)
-                    items.append(item)
-                    interactions.append(interactions_matrix[user_idx][item_idx])
-                if len(users) == batch_size:
-                    yield ({'user_input': np.array(users), 'item_input': np.array(items)},
-                           np.array(interactions))
-                    users = []
-                    items = []
-                    interactions = []
-
+import ncf_helper as helper
+from keras.optimizers import Adagrad, Adam
+from keras.regularizers import l2
+from keras import initializers
 
 def load_weights(model):
     model.get_layer('MLP_user_embed').set_weights(np.load('MLP_WE/mlp_user_embed_weights.npy'))
@@ -50,35 +31,67 @@ def load_weights(model):
 
 
 num_predictive_factors = 8
-batch_size = 1
-one_hot_users = np.load('input/one_hot_user.npy')
-one_hot_movies = np.load('input/one_hot_movies.npy')
-interaction_mx = np.load('input/interaction_mx.npy')
+batch_size = 256
+
 
 #----- MLP Model -----
-user_input = Input(shape=(len(one_hot_users),),name='user_input')
-item_input = Input(shape=(len(one_hot_movies),),name='item_input')
-
-MLP_user_embed = Dense(num_predictive_factors * 2, activation='sigmoid',name='MLP_user_embed')(user_input)
-MLP_item_embed = Dense(num_predictive_factors * 2, activation='sigmoid',name='MLP_item_embed')(item_input)
-
+interaction_mx = np.load('input/int_mat.npy')
+# load data
+inputs, labels = helper.training_data_generation('input/training_data.npy',interaction_mx, 5)
+#https://datascience.stackexchange.com/questions/13428/what-is-the-significance-of-model-merging-in-keras
+user_input = Input(shape=(1,),name='user_input')
+#item_input = Input(shape=(len(one_hot_movies),),name='item_input')
+item_input = Input(shape=(1,),name='item_input')
+MLP_user_embed = Flatten()(Embedding(interaction_mx.shape[0] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 name='MLP_user_embed',
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(user_input))
+MLP_item_embed = Flatten()(Embedding(interaction_mx.shape[1] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 name='MLP_item_embed',
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(item_input))
 MLP_merged_embed = concatenate([MLP_user_embed, MLP_item_embed], axis=1)
-mlp_1 = Dense(32, activation='relu',name='mlp_1')(MLP_merged_embed)
-mlp_2 = Dense(16, activation='relu',name='mlp_2')(mlp_1)
-mlp_3 = Dense(8, activation='relu',name='mlp_3')(mlp_2) #This will be the input for the final layer
+mlp_1 = Dense(32, activation='relu',
+              #W_regularizer = l2(0.01),
+              name='mlp_1')(MLP_merged_embed)
+mlp_2 = Dense(16, activation='relu',
+              #W_regularizer = l2(0.01),
+              name='mlp_2')(mlp_1)
+mlp_3 = Dense(8, activation='relu',
+              #W_regularizer = l2(0.01),
+              name='mlp_3')(mlp_2)
+
 MLP_main_output = Dense(1, activation='sigmoid',name='MLP_main_output')(mlp_3)
 
 #----- GMF Model -----
-GMF_user_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name='GMF_user_embed')(user_input)
-GMF_item_embed = Dense(num_predictive_factors * 2, activation='sigmoid', name='GMF_item_embed')(item_input)
 
+GMF_user_embed = Flatten()(Embedding(interaction_mx.shape[0] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 name='GMF_user_embed',
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(user_input))
+GMF_item_embed = Flatten()(Embedding(interaction_mx.shape[1] + 1,
+                                 num_predictive_factors * 2,
+                                 #W_regularizer = l2(0.01),
+                                 input_length=1,
+                                 #dropout = 0.3,
+                                 name='GMF_item_embed',
+                                 embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(item_input))
 GMF_merged_embed = multiply([GMF_user_embed, GMF_item_embed])
 
-GMF_layer = Dense(1, activation='sigmoid',name='GMF_layer')(GMF_merged_embed)
+GMF_main_output = Dense(1, activation='sigmoid',name='GMF_main_output')(GMF_merged_embed)
 
 #Concatenate with GMF last layer
 #MLP_input = Input(shape=(len(one_hot_users),),name='MLP_input') #This may be necessary
-gmf_mlp_concatenated = concatenate([MLP_main_output, GMF_layer], axis=1);
+gmf_mlp_concatenated = concatenate([MLP_main_output, GMF_main_output], axis=1);
 
 
 #Feed previous concatenate to NeuMF Layer
