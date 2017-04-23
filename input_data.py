@@ -1,5 +1,7 @@
 import numpy as np
 
+##this block's functions are created for preprocess and training data generation 
+
 #create index dictionary for an list
 def idx_dict(array):
     idx_dict = {}
@@ -7,24 +9,7 @@ def idx_dict(array):
         idx_dict[array[i]] = i
     return idx_dict
 
-#build interaction matrix
-def interaction_matrix(u_dict, movs, usrs): 
-    interaction_vector = np.zeros((len(usrs), len(movs)))
-    #create idx dictionary for movie and user
-    movie_idx_dict = idx_dict(movs)
-    user_idx_dict = idx_dict(usrs)
-    for usr in usrs:
-        for mov in list(u_dict[usr]):
-             interaction_vector[user_idx_dict[usr]][movie_idx_dict[mov]] = 1
-    return interaction_vector
-
-#create one hot vector for a list 
-def one_hot_vector(array):
-    one_vector = np.zeros((len(array), len(array)))
-    for i in range(len(array)):
-        one_vector[i][i] = 1
-    return one_vector
-
+                    
 ##add -1 to indicate the (user, movie) pair are used for testing purpose                    
 def add_neg_one(test_dict, int_mx, movs, usrs):
     movie_idx_dict = idx_dict(movs)
@@ -32,30 +17,54 @@ def add_neg_one(test_dict, int_mx, movs, usrs):
     for usr in test_dict:
         if usr in user_idx_dict:
             int_mx[user_idx_dict[usr]][movie_idx_dict[test_dict[usr]]] = -1
-        
+
+            
+#build interaction matrix
+def interaction_matrix(u_dict,row,column): 
+    interaction_vector = np.zeros((row, column))
+    #create idx dictionary for movie and user
+    for usr in u_dict:
+        for mov in list(u_dict[usr]):
+             interaction_vector[usr][mov] = 1
+    return interaction_vector
+
+#add test data to the interaction matrix 
+def add_one(test_dict, mat):
+    for usr in test_dict:
+        mat[usr][test_dict[usr]] = 1
 
 # In[47]:
 
 ##build user dictionary, user list can be created by getting the keys for user dictionary 
 user_dict = {}
-#set for movies
-movies = set()
-#user_list
-users = []
 #test dictionary
 test_user = {}
+#row number of interaction matrix(user)
+row_num = 0
+#column number of interaction matrix(movie)
+column_num = 0
+#movie list
+movies = []
+#user
+users = []
+#training data
+train_data = []
 
 # read data from ratings.csv, userId, movieId, timestamp
+
 file_path = 'data/movielens/ratings.dat'
+
 
 ##create user dictionary
 with open(file_path, 'rb') as f:
-    f.readline()
-    for i in range(1,200):
-        data = f.readline().split("::")
+    for i in f.readlines():
+        data = i.split("::")
+    #for i in range(1,200):
+        #data = f.readline().split("::")
+
         #add movie to movie list
         if int(data[1]) not in movies:
-            movies.add(int(data[1]))   
+            movies.append(int(data[1]))   
         #add data into dictionary
         if int(data[0]) in user_dict:
             user_dict[int(data[0])].append( (int(data[1]), int(data[3])))
@@ -73,23 +82,32 @@ for user in user_dict:
     movie_list = [movie[0] for movie in movie_list]
     user_dict[user] = set(movie_list)
     
-
 #convert it back to list
 movies = list(movies)
 #add users Id from use dictionary 
 users = user_dict.keys()
+#assign column number
+row_num = max(users) + 1
+column_num = max(movies) + 1
 
-#interaction matrix 
-interact_mx = interaction_matrix(user_dict, movies, users)
-#create one hot matrix for user
-one_hot_user = one_hot_vector(users)
-#create one hot matrix for movies
-one_hot_movies = one_hot_vector(movies)
-#add negative one to the interaction matrix
-add_neg_one(test_user, interact_mx, movies, users)
+#training data
+user_item_pair = []
+for usr in user_dict:
+    for mov in list(user_dict[usr]):
+        user_item_pair.append([usr,mov])
 
-
-np.save('input/interaction_mx', interact_mx)
-np.save('input/one_hot_user', one_hot_user)
-np.save('input/one_hot_movies', one_hot_movies)
-
+#testing data
+test_pair = []
+for usr in test_user:
+    test_pair.append([usr,test_user[usr]])
+        
+#interaction matrix
+int_mat = interaction_matrix(user_dict,row_num,column_num)
+#add test data in the interaction matrix
+add_one(test_user,int_mat)
+#save the interaction matrix numpy
+np.save('input/int_mat', int_mat)
+#save user movie pair for training
+np.save('input/training_data', user_item_pair)
+#save user movie pair for testing 
+np.save('input/testing_data', test_pair)
