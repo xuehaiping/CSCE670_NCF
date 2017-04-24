@@ -1,6 +1,7 @@
 import numpy as np
 import operator
 
+NDCG_SCORES = np.arange(1,0,-0.1)
 def preprocess_data(users_matrix, items_matrix, interactions_matrix, batch_size):
     if (interactions_matrix.size - len(users_matrix[0])) % batch_size != 0:
         raise StandardError(str(interactions_matrix.size - len(users_matrix[0])) + 'is not divisible by ' + str(batch_size))
@@ -59,8 +60,18 @@ def hit_rate(sorted_predictions, target):
         return True
 
 def NDCG(sorted_predictions, target):
-    raise NotImplementedError
-    return False
+    
+    #Get the index from the champion list
+    idx = np.where(sorted_predictions == target)
+    
+    #Default score if not in champion list
+    score = 0
+    
+    #If target is at least in sorted_predictions get its score
+    if len(indx[0]) > 1:
+        score = NDCG_SCORES[idx[0]]
+        
+    return score
 
 def evaluate(fname, model, metric,interactions_matrix = None):
     summation = 0
@@ -88,7 +99,7 @@ def evaluate(fname, model, metric,interactions_matrix = None):
                 summation += 1
         # TODO: implement NDCG
         elif metric == 'ndcg':
-            summation += 1
+            summation += NDCG(sorted_predictions, idx)
         else:
             raise StandardError('metric has to be "hit_rate" or "ndcg"')
     return summation / float(interactions_matrix.shape[0])
