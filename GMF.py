@@ -22,12 +22,14 @@ def train_gmf(num_predictive_factors, batch_size, epochs):
                                      #W_regularizer = l2(0.01),
                                      input_length=1,
                                      #dropout = 0.3,
+                                     name='user_embed',
                                      embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(user_input))
     item_embed = Flatten()(Embedding(interaction_mx.shape[1] + 1,
                                      num_predictive_factors * 2,
                                      #W_regularizer = l2(0.01),
                                      input_length=1,
                                      #dropout = 0.3,
+                                     name='item_embed',
                                      embeddings_initializer = initializers.RandomNormal(mean = 0.0, stddev=0.01, seed=None))(item_input))
     merged_embed = multiply([user_embed, item_embed])
 

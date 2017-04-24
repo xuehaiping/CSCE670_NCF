@@ -3,6 +3,7 @@ from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
 
+data_management.load_data(file_path='data/movielens/ratings.dat')
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=8, batch_size=256, epochs=2)
 # pretrain GMF
