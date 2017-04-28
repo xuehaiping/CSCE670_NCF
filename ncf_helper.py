@@ -134,7 +134,7 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
                 summation += 1
         # TODO: implement NDCG
         elif metric == 'ndcg':
-            summation += 1
+            summation += NDCG(sorted_predictions, target_movies[idx])
         else:
             raise StandardError('metric has to be "hit_rate" or "ndcg"')
     return summation/float(int_matrix.shape[0])
