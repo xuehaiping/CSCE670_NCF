@@ -59,7 +59,7 @@ def add_one(test_dict, mat):
         mat[usr][test_dict[usr]] = 1
 
 
-def load_data(file_path='data/movielens/ratings.dat'):
+def load_data(file_path='../data/movielens/ratings.dat'):
     #build user dictionary, user list can be created by getting the keys for user dictionary
     user_dict = {}
     #test dictionary

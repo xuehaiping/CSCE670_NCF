@@ -22,17 +22,22 @@ def load_weights(model):
 
 num_predictive_factors = 8
 batch_size = 256
+num_pretrain_epochs = 2
+num_final_epochs = num_pretrain_epochs
 
-data_management.load_data(file_path='data/movielens/ratings.dat')
+
+data_management.load_data()
+interaction_mx = np.load('input/int_mat.npy')
+inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+
 # pretrain MLP
-MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=1)
+MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
+              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
 # pretrain GMF
-GMF.train_gmf(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=1)
+GMF.train_gmf(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
+              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
 
 # check out the shared vision guide at https://keras.io/getting-started/functional-api-guide/
-interaction_mx = np.load('input/int_mat.npy')
-# load data
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
 user_input = Input(shape=(1,), name='user_input')
 item_input = Input(shape=(1,), name='item_input')
 
@@ -41,7 +46,7 @@ item_input = Input(shape=(1,), name='item_input')
 mlp = MLP.create_model(num_users=interaction_mx.shape[0],
                        num_items=interaction_mx.shape[1],
                        num_predictive_factors=num_predictive_factors,
-                       pretrain=True)
+                       pretrain=False)
 mlp_output = mlp([user_input, item_input])
 
 
@@ -49,7 +54,7 @@ mlp_output = mlp([user_input, item_input])
 gmf = GMF.create_model(num_users=interaction_mx.shape[0],
                        num_items=interaction_mx.shape[1],
                        num_predictive_factors=num_predictive_factors,
-                       pretrain=True)
+                       pretrain=False)
 gmf_output = gmf([user_input, item_input])
 
 
@@ -63,7 +68,7 @@ model = load_weights(model)
 model.compile(optimizer='sgd',
               loss='binary_crossentropy',
               metrics=['accuracy'])
-model.fit(inputs, labels, batch_size=batch_size, epochs=2)
+model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
 hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
 print('accuracy rate of: ' + str(hit_rate_accuracy))

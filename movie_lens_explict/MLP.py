@@ -51,10 +51,7 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
     return model
 
 
-def train_mlp(num_predictive_factors,batch_size, epochs):
-    # TODO: pass in interaction matrix, inputs/labels
-    interaction_mx = np.load('input/int_mat.npy')
-    inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs, labels):
     pretrain_model = create_model(num_users=interaction_mx.shape[0],
                                   num_items=interaction_mx.shape[1],
                                   num_predictive_factors=num_predictive_factors,
@@ -79,5 +76,11 @@ def train_mlp(num_predictive_factors,batch_size, epochs):
     print('MLP produces accuracy rate of: ' + str(hit_rate_accuracy))
 
 if __name__ == '__main__':
-    data_management.load_data(file_path='data/movielens/ratings.dat')
-    train_mlp(num_predictive_factors=8, batch_size=256, epochs=2)
+    try:
+        interaction_mx = np.load('input/int_mat.npy')
+    except IOError:
+        data_management.load_data()
+        interaction_mx = np.load('input/int_mat.npy')
+    inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+    train_mlp(num_predictive_factors=8, batch_size=256, epochs=2,
+              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
