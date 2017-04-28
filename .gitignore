@@ -1,6 +1,8 @@
 .DS_Store
 .idea/
-data/
-.json
-.npy
-.pyc
+*.json
+*.npy
+*.pyc
+*.h5
+.ipynb_checkpoints/
+/data
