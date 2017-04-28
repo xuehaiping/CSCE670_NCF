@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import load_model
-import ncf_helper as helper
+import evaluation as helper
 
 # use model.save to save model trained in another script
 
