@@ -1,7 +1,7 @@
 import numpy as np
 import operator
 
-
+NDCG_SCORES = np.arange(1,0,-0.1)
 def hit_rate(sorted_predictions, target_movie, target_rating):
     movies = [int(i[0]) for i in sorted_predictions]
     #ratings = [int(i[1]) for i in sorted_predictions]
@@ -23,7 +23,7 @@ def ndcg(sorted_predictions, target_movie, target_rating):
     return score
 
 
-def evaluate_integer_input(fname, metric, interactions_matrix):
+def evaluate_integer_input(fname, model, metric, interactions_matrix):
     target_movies = []
     target_ratings = []
     int_matrix = np.load(interactions_matrix)
@@ -62,7 +62,6 @@ def evaluate_integer_input(fname, metric, interactions_matrix):
         if metric == 'hit_rate':
             if hit_rate(sorted_predictions, target_movie[idx], target_ratings[idx]):
                 summation += 1
-        #TODO: Fix this
         elif metric == 'ndcg':
             summation += ndcg(sorted_predictions, target_movie[idx], target_ratings[idx])
         else:
