@@ -74,11 +74,9 @@ def load_data(file_path='../data/movielens/ratings.dat'):
 
     ##create user dictionary
     with open(file_path, 'rb') as f:
-        control = 0
+        
         for i in f.readlines():
-            control+=1
-            if(control == 5):
-                break;
+            
             data = i.split("::")
             #data[0]==user, data[1]==movie, data[2]==rating, data[3]==timestamp
         #for i in range(1,200):
