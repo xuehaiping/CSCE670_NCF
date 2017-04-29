@@ -22,8 +22,8 @@ def ndcg(sorted_predictions, target_movie, target_rating):
     #Ideal score idgc = [5 ]
     return score
 
-def evaluate_rmse(fname = 'input/testing_data.npy', model, interactions_matrix = 'input/int_mat.npy'):
-    testing_input, testing_labels = data_management.training_data_generation(fname, interactions_matrix, 5)
+def evaluate_rmse(model):
+    testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
     #score = model.evaluate(testing_input, testing_labels)
     #score[0]==loss, score[1]==accuracy
     predicted_labels = model.predict(testing_input)
