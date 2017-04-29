@@ -1,5 +1,5 @@
 import numpy as np
-import operator
+import operator, data_management
 
 NDCG_SCORES = np.arange(1,0,-0.1)
 def hit_rate(sorted_predictions, target_movie, target_rating):
@@ -22,6 +22,11 @@ def ndcg(sorted_predictions, target_movie, target_rating):
     #Ideal score idgc = [5 ]
     return score
 
+def evaluate_rmse(fname = 'input/testing_data.npy', model, interactions_matrix = 'input/int_mat.npy'):
+    testing_input, testing_labels = data_management.training_data_generation(fname, interactions_matrix, 5)
+    score = model.evaluate(testing_input, testing_labels)
+    #score[0]==loss, score[1]==accuracy
+    return score
 
 def evaluate_integer_input(fname, model, metric, interactions_matrix):
     target_movies = []
@@ -60,10 +65,10 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:10]
         
         if metric == 'hit_rate':
-            if hit_rate(sorted_predictions, target_movie[idx], target_ratings[idx]):
+            if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
                 summation += 1
         elif metric == 'ndcg':
-            summation += ndcg(sorted_predictions, target_movie[idx], target_ratings[idx])
+            summation += ndcg(sorted_predictions, target_movies[idx], target_ratings[idx])
         else:
             raise StandardError('metric has to be "hit_rate" or "ndcg"')
     return summation/float(int_matrix.shape[0])
