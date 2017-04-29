@@ -1,0 +1,8 @@
+.DS_Store
+.idea/
+*.json
+*.npy
+*.pyc
+*.h5
+.ipynb_checkpoints/
+/data
