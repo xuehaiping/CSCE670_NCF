@@ -14,7 +14,7 @@ def training_data_generation(fname, int_mx, times):
     for data in lines:
         user_in.append(data[0])
         movie_in.append(data[1])
-        labels.append(1)
+        labels.append(int_mx[data[0]][data[1]])
     # generate random samples
     row, column = np.where(int_mx == 0)
     indices = list(zip(row, column))
