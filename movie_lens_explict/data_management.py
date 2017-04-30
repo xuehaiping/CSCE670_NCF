@@ -59,49 +59,53 @@ def interaction_matrix(u_dict,row,column):
 #add test data to the interaction matrix 
 def add_one(test_dict, mat):
     for usr in test_dict:
-        mat[usr][test_dict[usr]] = 1
+        for mov in test_dict[usr]:
+            mat[usr][mov[0]] = mov[1]
 
 
-def load_data(file_path='../data/movielens/ratings.dat'):
-    #build user dictionary, user list can be created by getting the keys for user dictionary
+
+def load_data(file_path='../data/ratings.dat'):
+    # build user dictionary, user list can be created by getting the keys for user dictionary
     user_dict = {}
-    #test dictionary
+    # test dictionary
     test_user = {}
     movies = []
-
     # read data from ratings.csv, userId, movieId, timestamp
     # UserID::MovieID::Rating::Timestamp
-
     ##create user dictionary
     with open(file_path, 'rb') as f:
-        
-        for i in f.readlines():
-            
-            data = i.split("::")
-            #data[0]==user, data[1]==movie, data[2]==rating, data[3]==timestamp
-        #for i in range(1,200):
-            #data = f.readline().split("::")
 
-            #add movie to movie list
+        for i in f.readlines():
+
+            data = i.split("::")
+            # data[0]==user, data[1]==movie, data[2]==rating, data[3]==timestamp
+            # for i in range(1,200):
+            # data = f.readline().split("::")
+
+            # add movie to movie list
             if int(data[1]) not in movies:
                 movies.append(int(data[1]))
-            #add user data into dictionary (movieId, rating)
+            # add user data into dictionary (movieId, rating)
             if int(data[0]) in user_dict:
                 user_dict[int(data[0])].append((int(data[1]), int(data[2]), int(data[3])))
             else:
-                user_dict[int(data[0])] = list()#First user appearence
+                user_dict[int(data[0])] = list()  # First user appearence
                 user_dict[int(data[0])].append((int(data[1]), int(data[2]), int(data[3])))
     f.close()
 
-    # pick out the lastest movie the user watch and add it to test dictionary
+    # pick out the last 5 movie the user watch and add it to test dictionary
     for user in user_dict:
-        #movie[2] == timestamp
+        # movie[2] == timestamp
         movie_list = sorted(user_dict[user], key=lambda movie: movie[2], reverse=True)
-        test_user[user] = [movie_list[0][0], movie_list[0][1]]
-        movie_list.pop(0)
+        test_user[user] = []
+        # pull five movie out
+        for i in range(0, 5):
+            test_user[user].append([movie_list[0][0], movie_list[0][1]])
+            movie_list.pop(0)
+        # add the training data to dictionary
         movie_rating_list = [[movie[0], movie[1]] for movie in movie_list]
         user_dict[user] = movie_rating_list
-   
+
     # convert it back to list
     movies = list(movies)
     users = user_dict.keys()
@@ -110,20 +114,21 @@ def load_data(file_path='../data/movielens/ratings.dat'):
     column_num = max(movies) + 1
 
     # training data
-    user_item_triplet = [] #user, movie, rating
+    user_item_triplet = []  # user, movie, rating
     for usr in user_dict:
         for mov in list(user_dict[usr]):
-            #mov[0] == id, mov[1]==rating
+            # mov[0] == id, mov[1]==rating
             user_item_triplet.append([usr, mov[0], mov[1]])
-            
+
     # testing data
     test_triplet = []
     for usr in test_user:
-        test_triplet.append([usr,test_user[usr][0], test_user[usr][1]])
+        for mov in test_user[usr]:
+            test_triplet.append([usr, mov[0], mov[1]])
 
-    int_mat = interaction_matrix(user_dict,row_num,column_num)
+    int_mat = interaction_matrix(user_dict, row_num, column_num)
     # add test data in the interaction matrix
-    add_one(test_user,int_mat)
+    add_one(test_user, int_mat)
     np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
