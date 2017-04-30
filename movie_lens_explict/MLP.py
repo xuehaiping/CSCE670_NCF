@@ -72,10 +72,13 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
     np.save('MLP_WE/mlp_user_embed_weights', pretrain_model.get_layer('MLP_user_embed').get_weights())
     np.save('MLP_WE/mlp_item_embed_weights', pretrain_model.get_layer('MLP_item_embed').get_weights())
 
-    hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
+    #hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
+    ndcg_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'ndcg', 'input/int_mat.npy')
     rmse_score = evaluation.evaluate_rmse(pretrain_model)
-    print('MLP produces hit rate accuracy of: ' + str(hit_rate_accuracy))
+    
+    print('MLP produces ndcg accuracy of: ' + str(ndcg_accuracy))
     print('MLP produces rmse accuracy of: ' + str(rmse_score))
+    
 if __name__ == '__main__':
     try:
         interaction_mx = np.load('input/int_mat.npy')
