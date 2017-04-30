@@ -23,7 +23,22 @@ def load_weights(model):
 num_predictive_factors = 8
 batch_size = 256
 num_pretrain_epochs = 2
+
+#p for predcit factors, b for batch size,e for epochs
+opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
+for opt, arg in opts:
+    if opt in ("-p", "--pfactor"):
+        num_predictive_factors = arg
+        print "Number of predictive factors is " + str(num_predictive_factors)
+    elif opt in ("-b", "--bsize"):
+        batch_size = arg
+        print "Batch size is " + str(batch_size)
+    elif opt in ("-e", "--epoch"):
+        num_pretrain_epochs = arg
+        print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
+
 num_final_epochs = num_pretrain_epochs
+
 
 
 data_management.load_data()
