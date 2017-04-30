@@ -2,6 +2,7 @@ import MLP, GMF, data_management, evaluation
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
+import keras.utils
 
 
 def load_weights(model):
@@ -28,8 +29,8 @@ num_final_epochs = num_pretrain_epochs
 
 data_management.load_data()
 interaction_mx = np.load('input/int_mat.npy')
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
-
+inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy')
+labels = keras.utils.to_categorical(labels, 5)
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
               interaction_mx=interaction_mx, inputs=inputs, labels=labels)
@@ -40,7 +41,7 @@ GMF.train_gmf(num_predictive_factors=num_predictive_factors, batch_size=batch_si
 # check out the shared vision guide at https://keras.io/getting-started/functional-api-guide/
 user_input = Input(shape=(1,), name='user_input')
 item_input = Input(shape=(1,), name='item_input')
-
+review_input = Input(shape=(1,), name='review_input')
 
 # ----- MLP Model -----
 mlp = MLP.create_model(num_users=interaction_mx.shape[0],
@@ -57,16 +58,23 @@ gmf = GMF.create_model(num_users=interaction_mx.shape[0],
                        pretrain=False)
 gmf_output = gmf([user_input, item_input])
 
+# ----- Paragraph2Vec Model -----
+par2vec1 = Dense(num_predictive_factors * 4, activation='relu',
+              name='par2vec1')(review_input)
+par2vec2 = Dense(num_predictive_factors * 2, activation='relu',
+              name='par2vec2')(par2vec1)
+par2vec3 = Dense(num_predictive_factors, activation='relu',
+              name='par2vec3')(par2vec2)
 
 # ----- Total Model -----
-gmf_mlp_concatenated = concatenate([mlp_output, gmf_output], axis=1)
-NeuMF = Dense(num_predictive_factors * 2, activation='sigmoid', name='NeuMF')(gmf_mlp_concatenated)
-NeuMF_main_output = Dense(1, activation='sigmoid', name='NeuMF_main_output')(NeuMF)
-model = Model(inputs=[user_input, item_input], output=NeuMF_main_output)
+gmf_mlp_par2vec_concatenated = concatenate([mlp_output, gmf_output,par2vec3], axis=1)
+NeuMF = Dense(num_predictive_factors * 3, activation='sigmoid', name='NeuMF')(gmf_mlp_par2vec_concatenated)
+NeuMF_main_output = Dense(5, activation='softmax', name='NeuMF_main_output')(NeuMF)
+model = Model(inputs=[user_input, item_input, review_input], output=NeuMF_main_output)
 
 model = load_weights(model)
 model.compile(optimizer='sgd',
-              loss='binary_crossentropy',
+              loss='categorical_crossentropy',
               metrics=['accuracy'])
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
