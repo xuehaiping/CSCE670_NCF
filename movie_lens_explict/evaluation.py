@@ -1,5 +1,7 @@
 import numpy as np
 import operator, data_management
+from math import log
+from operator import div
 
 NDCG_SCORES = np.arange(1,0,-0.1)
 def hit_rate(sorted_predictions, target_movie, target_rating):
@@ -9,18 +11,15 @@ def hit_rate(sorted_predictions, target_movie, target_rating):
         return True
 
 
-def ndcg(sorted_predictions, target_movie, target_rating):
-    #Get the index from the champion list
-    idx = np.where(sorted_predictions == target)
-    
-    #Default score if not in champion list
-    score = 0
-    
-    #If target is at least in sorted_predictions get its score
-    if len(indx[0]) > 1:
-        score = NDCG_SCORES[idx[0]]
-    #Ideal score idgc = [5 ]
-    return score
+
+def dcg(predicted_ratings):
+    return np.sum(reduce(lambda dcgs, dg: dcgs + [dg+dcgs[-1]],\
+                  map(lambda (rank, g): (2**g-1) / log( rank+2, 2), enumerate( predicted_ratings ) ), [0])[1:])
+
+#Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
+# are ratings for the same movies in the same order but maybe with different values.
+def ndcg( predicted_ratings, ideal_testing_ratings ): 
+    return dcg(predicted_ratings)/ dcg(ideal_testing_ratings)
 
 def evaluate_rmse(model):
     testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
