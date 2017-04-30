@@ -132,3 +132,4 @@ def load_data(file_path='../data/ratings.dat'):
     np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
+    ## for god dam commit
