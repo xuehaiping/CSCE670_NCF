@@ -1,6 +1,25 @@
 import numpy as np
 
-##this block's functions are created for preprocess and training data generation 
+##this block's functions are created for preprocess and training data generation
+
+
+def prune_data(input_name, output_name, min_reviews_per_user):
+    met_min = []
+    review_counts = dict()
+    with open(input_name, 'rb') as input_file:
+        for i in input_file.readlines():
+            data = i.split("::", 1)
+            if data[0] in review_counts:
+                review_counts[data[0]] += 1
+            else:
+                review_counts[data[0]] = 1
+    with open(output_name, 'w') as output_file:
+        with open(input_name, 'rb') as input_file:
+            for line in input_file.readlines():
+                data = line.split("::", 1)
+                if review_counts[data[0]] >= min_reviews_per_user:
+                    output_file.write(line)
+
 
 def training_data_generation(fname, int_mx):
     user_in = []
@@ -54,7 +73,7 @@ def add_one(test_dict, mat):
         mat[usr][test_dict[usr]] = 1
 
 
-def load_data(file_path='../data/yelp/yelp_sample.dat', review_file_path='input/docvecs.npy'):
+def load_data(file_path='../data/yelp_pruned.dat', review_file_path='input/docvecs.npy'):
     #build user dictionary, user list can be created by getting the keys for user dictionary
     user_dict = {}
     #test dictionary
@@ -125,3 +144,7 @@ def load_data(file_path='../data/yelp/yelp_sample.dat', review_file_path='input/
     np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
+
+if __name__ == '__main__':
+    prune_data('/media/henry/1456291D5629015A/Users/Henry/Desktop/yelp.dat',
+               '/home/henry/PycharmProjects/CSCE670_NCF/data/yelp_pruned.dat', 20)
