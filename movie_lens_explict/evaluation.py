@@ -48,28 +48,39 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         #User is a row build from movie's ratings (rather than only 1's)
         
         # pick 100 random non-rated movies 
-        zero_indices = np.where(user == 0)[0]
-        np.random.shuffle(zero_indices)
-        random_indices = zero_indices[0:100] #Movie Ids
+        #zero_indices = np.where(user == 0)[0]
+        #np.random.shuffle(zero_indices)
+        #random_indices = zero_indices[0:100] #Movie Ids
         
         # transform into inputs for keras
-        movie_vectors = np.append(random_indices, target_movies[idx])
-        rating_vectors = np.append(user[random_indices], target_ratings[idx])
+        movie_vectors = target_movies[idx]
+        rating_vectors = target_ratings[idx]
         user_vectors = np.repeat([idx + 1], rating_vectors.size, axis=0)
         
-        # generate predictions
+        #Sort movies by rating in decreasing order. So movie_vectors, rating_vectors and user_vectors
+        movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i]) for i,v in enumerate(movie_vectors)]
+        sorted_tuples = sorted(movie_rating_user_tuples, key=lambda item: item[1])
+        
+        #Put them back to arrays so we can pass to the NDCG function an ideal ratings vector
+        #We do this right before predict, so the predicted labels are returned in this same way, so we only need to pass it to ndcg
+        for i,v in enumerate(sorted_tuples):
+            movie_vectors[i] = v[0]
+            rating_vectors[i] = v[1]
+            user_vectors[i] = v[2]
+        
+        # generate predictions. This predictions are in the same order as movie_vectors, so we can pass it as it is to the ndcg function
         predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
-        predictions_idx = dict(zip(movie_vectors, predictions))
+        #predictions_idx = dict(zip(movie_vectors, predictions))
         
         #Sorted by ratings
-        sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:10]
+        #sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
         
         if metric == 'hit_rate':
             raise StandardError('Hit rate not suported for rankings"')
             #if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
                 #summation += 1
         elif metric == 'ndcg':
-            summation += ndcg(sorted_predictions, target_movies[idx], target_ratings[idx])
+            return ndcg(rating_vectors, predictions)
         else:
             raise StandardError('metric has to be "ndcg"')
     return summation/float(int_matrix.shape[0])
