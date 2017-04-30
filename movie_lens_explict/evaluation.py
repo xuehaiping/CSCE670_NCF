@@ -10,15 +10,14 @@ def hit_rate(sorted_predictions, target_movie, target_rating):
     if target_movie in movies:
         return True
 
-
-
-def dcg(predicted_ratings):
-    return np.sum(reduce(lambda dcgs, dg: dcgs + [dg+dcgs[-1]],\
-                  map(lambda (rank, g): (2**g-1) / log( rank+2, 2), enumerate( predicted_ratings ) ), [0])[1:])
+def dcg(ratings):
+    #The first i+1 is because enumerate starts at 0
+    dcg_values = [(v/log(i+1+1, 2)) for i,v in enumerate(ratings)]
+    return np.sum(dcg_values)
 
 #Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
 # are ratings for the same movies in the same order but maybe with different values.
-def ndcg( predicted_ratings, ideal_testing_ratings ): 
+def ndcg( ideal_testing_ratings, predicted_ratings ): 
     return dcg(predicted_ratings)/ dcg(ideal_testing_ratings)
 
 def evaluate_rmse(model):
@@ -66,10 +65,11 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:10]
         
         if metric == 'hit_rate':
-            if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
-                summation += 1
+            raise StandardError('Hit rate not suported for rankings"')
+            #if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
+                #summation += 1
         elif metric == 'ndcg':
             summation += ndcg(sorted_predictions, target_movies[idx], target_ratings[idx])
         else:
-            raise StandardError('metric has to be "hit_rate" or "ndcg"')
+            raise StandardError('metric has to be "ndcg"')
     return summation/float(int_matrix.shape[0])
