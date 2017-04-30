@@ -22,7 +22,6 @@ def load_weights(model):
     return model
 
 
-
 num_predictive_factors = 8
 batch_size = 256
 num_pretrain_epochs = 2
@@ -41,6 +40,7 @@ for opt, arg in opts:
 	print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
 
 num_final_epochs = num_pretrain_epochs
+
 
 data_management.load_data()
 interaction_mx = np.load('input/int_mat.npy')
