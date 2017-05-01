@@ -143,19 +143,35 @@ def load_data(file_path, review_file_path):
             # mov[0] == id, mov[1]==rating
             user_item_triplet.append([usr, mov[0], mov[1]])
 
+    # training_reviews
+    training_reviews = []  # user, movie, rating
+    for usr in user_dict:
+        for mov in list(user_dict[usr]):
+            # mov[0] == id, mov[1]==rating
+            training_reviews.append(mov[2])
+
     # testing data
     test_triplet = []
     for usr in test_user:
         for mov in test_user[usr]:
             test_triplet.append([usr, mov[0], mov[1]])
 
+    # testing_reviews
+    testing_reviews = []  # user, movie, rating
+    for usr in user_dict:
+        for mov in list(user_dict[usr]):
+            # mov[0] == id, mov[1]==rating
+            testing_reviews.append(mov[2])
+
     np.save('input/training_data', user_item_triplet)
+    np.save('input/training_reviews', training_reviews)
     np.save('input/testing_data', test_triplet)
+    np.save('input/testing_reviews', testing_reviews)
     np.save('input/dimensions', np.array([row_num, column_num]))
 
 
 if __name__ == '__main__':
-     prune_data('../data/yelp/yelp.dat',
-               '../data/yelp/yelp_pruned_20.dat', 20, 0.1)
-     #load_data(file_path='../data/yelp/yelp_pruned_20.dat',
-     #         review_file_path='input/docvecs.npy')
+     #prune_data('../data/yelp/yelp.dat',
+     #         '../data/yelp/yelp_pruned_20.dat', 20, 0.1)
+     load_data(file_path='../data/yelp/yelp_pruned_20.dat',
+              review_file_path='input/docvecs.npy')
