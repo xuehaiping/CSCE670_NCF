@@ -17,6 +17,8 @@ def prune_data(input_name, output_name, min_reviews_per_user, percent):
     # count how many reviews/user
     random.seed(3)
     review_counts = dict()
+    users = {}
+    restaurants = {}
     with open(input_name, 'rb') as input_file:
         for i in input_file.readlines():
             data = i.split("::", 1)
@@ -28,16 +30,37 @@ def prune_data(input_name, output_name, min_reviews_per_user, percent):
     for key, value in review_counts.iteritems():
         if value >= min_reviews_per_user and random.random() > percent:
             review_counts[key] = -1
-    # write chosen reviews to file
-    counter = 0
+    # reassign user and item IDs
+    user_counter = 0
+    restaurant_counter = 0
+    written_counter = 0
     with open(output_name, 'w') as output_file:
         with open(input_name, 'rb') as input_file:
-            for line in input_file.readlines():
-                data = line.split("::", 1)
+            for i in input_file.readlines():
+                data = i.split("::", 2)
                 if review_counts[data[0]] >= min_reviews_per_user:
-                    output_file.write(line)
-                    counter += 1
-    print ('wrote ' + str(counter) + ' reviews to file')
+                    line_data = []
+                    if data[0] not in users:
+                        users[data[0]] = user_counter
+                        line_data.append(users[data[0]])
+                        user_counter += 1
+                    else:
+                        line_data.append(users[data[0]])
+
+                    # process restaurant
+                    if data[1] not in restaurants:
+                        restaurants[data[1]] = restaurant_counter
+                        line_data.append(restaurants[data[1]])
+                        restaurant_counter += 1
+                    else:
+                        line_data.append(restaurants[data[1]])
+                    # process everything else
+                    line_data.append(data[2])
+
+                    output_file.write("%d::%d::%s" % (line_data[0], line_data[1], line_data[2]))
+                    written_counter += 1
+
+    print ('wrote ' + str(written_counter) + ' reviews to file')
 
 
 def training_data_generation(fname, int_mx):
@@ -57,35 +80,6 @@ def training_data_generation(fname, int_mx):
 
     return {'user_input': np.array(user_in), 'item_input': np.array(movie_in), 'review_input': reviews_in}, np.array(
         labels)
-
-
-# create index dictionary for an list
-def idx_dict(array):
-    idx_dict = {}
-    for i in range(0, len(array)):
-        idx_dict[array[i]] = i
-    return idx_dict
-
-
-# build interaction matrix
-def interaction_matrix(u_dict, row, column):
-    # u_dict
-    # {1: [[914, 3], [1193, 5], [3408, 4]]}
-    print('row'+ str(row))
-    print('column' + str(column))
-    interaction_vector = np.zeros((row, column))
-    # create idx dictionary for movie and user
-    for usr in u_dict:
-        for mov_rating_pair in list(u_dict[usr]):
-            interaction_vector[usr][mov_rating_pair[0]] = mov_rating_pair[1]
-
-    return interaction_vector
-
-
-# add test data to the interaction matrix
-def add_one(test_dict, mat):
-    for usr in test_dict:
-        mat[usr][test_dict[usr]] = 1
 
 
 def load_data(file_path, review_file_path):
@@ -140,8 +134,8 @@ def load_data(file_path, review_file_path):
     movies = list(movies)
     users = user_dict.keys()
     # assign row and column numbers
-    row_num = max(users) + 1
-    column_num = max(movies) + 1
+    row_num = len(users)
+    column_num = len(movies)
 
     # training data
     user_item_triplet = []  # user, movie, rating
@@ -156,12 +150,9 @@ def load_data(file_path, review_file_path):
         for mov in test_user[usr]:
             test_triplet.append([usr, mov[0], mov[1]])
 
-    int_mat = interaction_matrix(user_dict, row_num, column_num)
-    # add test data in the interaction matrix
-    add_one(test_user, int_mat)
-    np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
+    np.save('input/dimensions', [row_num,column_num])
 
 
 if __name__ == '__main__':
