@@ -18,7 +18,7 @@ class corpusIterable(object):
         https://rare-technologies.com/data-streaming-in-python-generators-iterators-iterables/
 
         """
-        with open('../data/yelp_pruned.dat') as f:
+        with open('../data/yelp/yelp_pruned_20.dat') as f:
             for index, line in enumerate(f):
                 data = line.split("::", 4)
                 # For training data, add tags
@@ -60,6 +60,6 @@ def doc2vec(input_file_path, output_file_path):
 
 if __name__ == '__main__':
 
-    doc2vec('../data/yelp_pruned.dat', 'input/docvecs.npy')
+    doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
 
 
