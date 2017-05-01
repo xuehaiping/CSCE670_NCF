@@ -23,7 +23,7 @@ users = {}
 restaurants = {}
 new_yelp_data = []
 
-with open('../data/yelp_academic_dataset_review.json', 'r') as data_file:
+with open('../data/yelp/training_data.json', 'r') as data_file:
         for line in data_file.readlines():
             yelp_data = []
             data = json.loads(line)
@@ -56,7 +56,7 @@ data_file.close()
 
 
 #write the data into the new file 
-with open('../data/yelp.dat', 'w+') as new_data:
+with open('../data/yelp/yelp_sample.dat', 'w+') as new_data:
     for line in new_yelp_data:
         new_data.write("%d::%d::%d::%d::%s\n"%(line[0],line[1],line[2],line[3],line[4].encode('ascii', 'ignore').replace('\n', ' ')))
 

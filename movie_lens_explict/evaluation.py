@@ -3,6 +3,7 @@ import operator, data_management
 from math import log
 from operator import div
 
+
 def hit_rate(sorted_predictions, target_movie, target_rating):
     movies = [int(i[0]) for i in sorted_predictions]
     #ratings = [int(i[1]) for i in sorted_predictions]
@@ -19,6 +20,13 @@ def dcg(ratings):
     dcg_values = [(v / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
     return np.sum(dcg_values)
 
+def evaluate_rmse(model):
+    testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
+    #score = model.evaluate(testing_input, testing_labels)
+    #score[0]==loss, score[1]==accuracy
+    predicted_labels = model.predict(testing_input)
+    rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
+    return rmse
 
 # Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
 # are ratings for the same movies in the same order but maybe with different values.
@@ -105,6 +113,7 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
                 print "highest predictions" + str(highest_predictions)
                 print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
                 print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
+
         else:
             raise StandardError('metric has to be "ndcg"')
     return summation / float(int_matrix.shape[0])
