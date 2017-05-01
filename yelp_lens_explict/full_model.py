@@ -2,9 +2,8 @@ import MLP, GMF, data_management, evaluation
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
-import keras.utils
-import doc2vec
-
+import sys, getopt
+import keras
 
 def load_weights(model):
     # changed from model_n to index because model names seem to change.  Look into naming each model.
@@ -38,14 +37,14 @@ for opt, arg in opts:
         print "Batch size is " + str(batch_size)
     elif opt in ("-e", "--epoch"):
         num_pretrain_epochs = arg
-        print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
+        print "number of training epochs for pretrain and full model is " + str(num_pretrain_epochs)
 
 num_final_epochs = num_pretrain_epochs
 
 
 
 data_management.load_data()
-interaction_mx = np.load('input/int_mat.npy')
+dimensions = np.load('input/dimensions.npy')
 inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
 
 
