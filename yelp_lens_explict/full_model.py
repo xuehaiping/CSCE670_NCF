@@ -24,11 +24,11 @@ def load_weights(model):
 
 num_predictive_factors = 8
 batch_size = 256
-num_pretrain_epochs = 2
+num_pretrain_epochs = 100
 num_final_epochs = num_pretrain_epochs
-
-#doc2vec.doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
-#data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat', review_file_path='input/docvecs.npy')
+data_management.prune_data('../data/yelp/yelp.dat', '../data/yelp/yelp_pruned_20.dat', 20, 0.5)
+doc2vec.doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
+data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat', review_file_path='input/docvecs.npy')
 dimensions = np.load('input/dimensions.npy')
 inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/training_reviews.npy')
 print('Input size: ' + str(len(inputs['user_input'])) + '-' + str(len(inputs['item_input'])) + '-' + str(len(inputs['review_input'])))
