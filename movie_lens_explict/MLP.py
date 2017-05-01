@@ -4,7 +4,7 @@ import numpy as np
 import evaluation
 import data_management
 from keras import initializers
-
+import keras
 
 def create_model(num_users, num_items, num_predictive_factors,pretrain):
     #def init_normal( name=None):
@@ -41,9 +41,9 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
     mlp_3 = Dense(num_predictive_factors, activation='relu',
                   # W_regularizer = l2(0.01),
                   name='mlp_3')(mlp_2)
-    main_output = Dense(1,
+    main_output = Dense(6,
                         # W_regularizer = l2(0.01),
-                        activation='relu', init='lecun_uniform', name='main_output')(mlp_3)
+                        activation='softmax', init='lecun_uniform', name='main_output')(mlp_3)
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)
     else:
@@ -56,9 +56,10 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
                                   num_items=interaction_mx.shape[1],
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
-    pretrain_model.compile(optimizer='Adam',
-                           loss='mean_squared_error',
-                           metrics=['accuracy'])
+
+
+    pretrain_model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
+
 
     pretrain_model.fit(inputs, labels, batch_size, epochs)
 
@@ -72,16 +73,21 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
     np.save('MLP_WE/mlp_user_embed_weights', pretrain_model.get_layer('MLP_user_embed').get_weights())
     np.save('MLP_WE/mlp_item_embed_weights', pretrain_model.get_layer('MLP_item_embed').get_weights())
 
-    hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
-    rmse_score = evaluation.evaluate_rmse(pretrain_model)
-    print('MLP produces hit rate accuracy of: ' + str(hit_rate_accuracy))
-    print('MLP produces rmse accuracy of: ' + str(rmse_score))
-if __name__ == '__main__':
-    try:
-        interaction_mx = np.load('input/int_mat.npy')
-    except IOError:
-        data_management.load_data()
-        interaction_mx = np.load('input/int_mat.npy')
-    inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
-    train_mlp(num_predictive_factors=8, batch_size=256, epochs=2,
-              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+
+    #hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
+    #ndcg_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'ndcg', 'input/int_mat.npy')
+    #rmse_score = evaluation.evaluate_rmse(pretrain_model)
+    
+    #print('MLP produces ndcg accuracy of: ' + str(ndcg_accuracy))
+    #print('MLP produces rmse accuracy of: ' + str(rmse_score))
+    
+# if __name__ == '__main__':
+#     try:
+#         interaction_mx = np.load('input/int_mat.npy')
+#     except IOError:
+#         data_management.load_data()
+#         interaction_mx = np.load('input/int_mat.npy')
+#     inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+#     train_mlp(num_predictive_factors=8, batch_size=256, epochs=2,
+#               interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+

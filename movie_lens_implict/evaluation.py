@@ -1,16 +1,25 @@
 import numpy as np
 import operator
 
+NDCG_IDEAL_SCORES = np.arange(1,0,-0.1)
 
 def hit_rate(sorted_predictions, target):
     movies = [int(i[0]) for i in sorted_predictions]
     if target in movies:
         return True
 
-
 def ndcg(sorted_predictions, target):
-    raise NotImplementedError
-    return False
+    #each element in sorted prediction, position [0] == movie, [1] == prediction
+    
+    #Get the index from the champion list
+    movies = [int(i[0]) for i in sorted_predictions]
+    score = 0
+    
+    if target in movies:
+        #Get its score relative to its position
+        score = NDCG_IDEAL_SCORES[movies.index(target)]
+        
+    return score
 
 
 def evaluate_integer_input(fname, model, metric, interactions_matrix):
@@ -37,9 +46,8 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         if metric == 'hit_rate':
             if hit_rate(sorted_predictions, target_movies[idx]):
                 summation += 1
-        # TODO: implement NDCG
         elif metric == 'ndcg':
-            summation += 1
+            summation += ndcg(sorted_predictions, target_movies[idx])
         else:
             raise StandardError('metric has to be "hit_rate" or "ndcg"')
     return summation/float(int_matrix.shape[0])

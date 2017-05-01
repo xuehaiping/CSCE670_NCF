@@ -24,15 +24,31 @@ def load_weights(model):
 
 num_predictive_factors = 8
 batch_size = 256
-num_pretrain_epochs = 100
+
+num_pretrain_epochs = 2
+
+#p for predcit factors, b for batch size,e for epochs
+opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
+for opt, arg in opts:
+    if opt in ("-p", "--pfactor"):
+        num_predictive_factors = arg
+        print "Number of predictive factors is " + str(num_predictive_factors)
+    elif opt in ("-b", "--bsize"):
+        batch_size = arg
+        print "Batch size is " + str(batch_size)
+    elif opt in ("-e", "--epoch"):
+        num_pretrain_epochs = arg
+        print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
+
 num_final_epochs = num_pretrain_epochs
-data_management.prune_data('../data/yelp/yelp.dat', '../data/yelp/yelp_pruned_20.dat', 20, 0.5)
-doc2vec.doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
-data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat', review_file_path='input/docvecs.npy')
-dimensions = np.load('input/dimensions.npy')
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/training_reviews.npy')
-print('Input size: ' + str(len(inputs['user_input'])) + '-' + str(len(inputs['item_input'])) + '-' + str(len(inputs['review_input'])))
-print('Output size: ' + str(len(labels)))
+
+
+
+data_management.load_data()
+interaction_mx = np.load('input/int_mat.npy')
+inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+
+
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
               dimensions=dimensions, inputs=inputs, labels=labels)

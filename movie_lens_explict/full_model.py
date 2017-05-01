@@ -2,7 +2,8 @@ import MLP, GMF, data_management, evaluation
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
-
+import sys, getopt
+import keras
 
 def load_weights(model):
     # changed from model_n to index because model names seem to change.  Look into naming each model.
@@ -23,13 +24,28 @@ def load_weights(model):
 num_predictive_factors = 8
 batch_size = 256
 num_pretrain_epochs = 2
+
+#p for predcit factors, b for batch size,e for epochs
+opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
+for opt, arg in opts:
+    if opt in ("-p", "--pfactor"):
+        num_predictive_factors = arg
+        print "Number of predictive factors is " + str(num_predictive_factors)
+    elif opt in ("-b", "--bsize"):
+        batch_size = arg
+        print "Batch size is " + str(batch_size)
+    elif opt in ("-e", "--epoch"):
+        num_pretrain_epochs = arg
+        print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
+
 num_final_epochs = num_pretrain_epochs
+
 
 
 data_management.load_data()
 interaction_mx = np.load('input/int_mat.npy')
 inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
-
+labels = keras.utils.to_categorical(labels, 6)
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
               interaction_mx=interaction_mx, inputs=inputs, labels=labels)
@@ -61,15 +77,15 @@ gmf_output = gmf([user_input, item_input])
 # ----- Total Model -----
 gmf_mlp_concatenated = concatenate([mlp_output, gmf_output], axis=1)
 NeuMF = Dense(num_predictive_factors * 2, activation='sigmoid', name='NeuMF')(gmf_mlp_concatenated)
-NeuMF_main_output = Dense(1, activation='sigmoid', name='NeuMF_main_output')(NeuMF)
+NeuMF_main_output = Dense(6, activation='softmax', name='NeuMF_main_output')(NeuMF)
 model = Model(inputs=[user_input, item_input], output=NeuMF_main_output)
 
 model = load_weights(model)
-model.compile(optimizer='sgd',
-              loss='binary_crossentropy',
-              metrics=['accuracy'])
+
+model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
+
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
-hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
-print('accuracy rate of: ' + str(hit_rate_accuracy))
+#hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
+#print('accuracy rate of: ' + str(hit_rate_accuracy))
 model.save('final_model.h5')
