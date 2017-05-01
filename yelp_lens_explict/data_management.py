@@ -63,22 +63,21 @@ def prune_data(input_name, output_name, min_reviews_per_user, percent):
     print ('wrote ' + str(written_counter) + ' reviews to file')
 
 
-def training_data_generation(fname, int_mx):
+def training_data_generation(fname,reviews_input):
     user_in = []
     movie_in = []
-    reviews_in = []
+    #reviews_in = []
     labels = []
-    neg_sample_num = 0
     lines = np.load(fname)
-    int_mx = np.load(int_mx)
+    reviews = np.load(reviews_input)
     # generate postive data
     for data in lines:
         user_in.append(data[0])
         movie_in.append(data[1])
-        reviews_in.append(data[2])
-        labels.append(int_mx[data[0]][data[1]])
+        #reviews_in.append(data[2])
+        labels.append(data[2])
 
-    return {'user_input': np.array(user_in), 'item_input': np.array(movie_in), 'review_input': reviews_in}, np.array(
+    return {'user_input': np.array(user_in), 'item_input': np.array(movie_in), 'review_input': reviews}, np.array(
         labels)
 
 
