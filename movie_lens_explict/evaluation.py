@@ -43,12 +43,16 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
     int_matrix = np.delete(int_matrix, 0, 1)
 
     lines = np.load(fname)
-
+    #control = 0
     for line in lines:
-        
+        #control += 1;
+        #if control < 10:
+            #print line
         if line[0] not in target_movies.keys(): 
             target_movies[line[0]] = [line[1]]
             target_ratings[line[0]] = [line[2]]
+
+
         else:
             target_movies[line[0]].append(line[1])
             target_ratings[line[0]].append(line[2])
@@ -62,8 +66,11 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         
         movie_vectors = target_movies[idx + 1]
         rating_vectors = target_ratings[idx + 1]
-        user_vectors = np.repeat([idx + 1], len(rating_vectors), axis=0)        
-        
+        user_vectors = np.repeat([idx + 1], len(rating_vectors), axis=0)
+
+        movie_vectors_non_sorted = movie_vectors
+        rating_vectors_non_sorte = rating_vectors
+
         # Sort movies by rating in decreasing order. So movie_vectors, rating_vectors and user_vectors
         movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i]) for i, v in
                                     enumerate(movie_vectors)]
@@ -92,6 +99,12 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
             # summation += 1
         elif metric == 'ndcg':
             summation += ndcg(rating_vectors, highest_predictions)
+            if 10< idx < 30:
+                print "rating vectors" + str(rating_vectors)
+                print "predictions" + str(predictions)
+                print "highest predictions" + str(highest_predictions)
+                print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
+                print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
         else:
             raise StandardError('metric has to be "ndcg"')
     return summation / float(int_matrix.shape[0])
