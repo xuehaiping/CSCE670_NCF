@@ -152,7 +152,7 @@ def load_data(file_path, review_file_path):
 
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
-    np.save('input/dimensions', [row_num,column_num])
+    np.save('input/dimensions', np.array([row_num, column_num]))
 
 
 if __name__ == '__main__':
