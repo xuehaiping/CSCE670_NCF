@@ -71,6 +71,8 @@ def idx_dict(array):
 def interaction_matrix(u_dict, row, column):
     # u_dict
     # {1: [[914, 3], [1193, 5], [3408, 4]]}
+    print('row'+ str(row))
+    print('column' + str(column))
     interaction_vector = np.zeros((row, column))
     # create idx dictionary for movie and user
     for usr in u_dict:
@@ -86,7 +88,7 @@ def add_one(test_dict, mat):
         mat[usr][test_dict[usr]] = 1
 
 
-def load_data(file_path='../data/yelp_pruned.dat', review_file_path='input/docvecs.npy'):
+def load_data(file_path, review_file_path):
     # build user dictionary, user list can be created by getting the keys for user dictionary
     user_dict = {}
     # test dictionary
@@ -99,11 +101,11 @@ def load_data(file_path='../data/yelp_pruned.dat', review_file_path='input/docve
     ## create user dictionary
     with open(file_path, 'rb') as f:
         index = 0
-        #for i in f.readlines():
-        #    data = i.split("::")
+        for i in f.readlines():
+            data = i.split("::")
         # data[0]==user, data[1]==movie, data[2]==rating, data[3]==timestamp
-        for i in range(1, 20000):
-            data = f.readline().split("::")
+        #for i in range(1, 20000):
+        #    data = f.readline().split("::")
 
             # add movie to movie list
             if int(data[1]) not in movies:
@@ -122,7 +124,7 @@ def load_data(file_path='../data/yelp_pruned.dat', review_file_path='input/docve
     print('read into user_dict')
 
     # pick out the lastest movie the user watch and add it to test dictionary
-    for user in user_dict:
+    for index,user in enumerate(user_dict):
         # movie[2] == timestamp
         movie_list = sorted(user_dict[user], key=lambda movie: movie[2], reverse=True)
         test_user[user] = []
@@ -163,7 +165,7 @@ def load_data(file_path='../data/yelp_pruned.dat', review_file_path='input/docve
 
 
 if __name__ == '__main__':
-     #prune_data('../data/yelp/yelp.dat',
-     #          '../data/yelp/yelp_pruned_20.dat', 20, 0.1)
-     load_data(file_path='../data/yelp/prune 20 dataset/yelp_pruned.dat',
-              review_file_path='../data/yelp/prune 20 dataset/docvecs.npy')
+     prune_data('../data/yelp/yelp.dat',
+               '../data/yelp/yelp_pruned_20.dat', 20, 0.1)
+     #load_data(file_path='../data/yelp/yelp_pruned_20.dat',
+     #         review_file_path='input/docvecs.npy')
