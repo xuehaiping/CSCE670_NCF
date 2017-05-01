@@ -27,16 +27,18 @@ num_pretrain_epochs = 2
 num_final_epochs = num_pretrain_epochs
 
 
-data_management.load_data()
-interaction_mx = np.load('input/int_mat.npy')
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy')
-labels = keras.utils.to_categorical(labels, 5)
+#data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat',review_file_path='input/docvecs.npy')
+dimensions = np.load('input/dimensions.npy')
+inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/dimensions.npy')
+print('Input size: ' + str(len(inputs['user_input'])) +'-' +  str(len(inputs['item_input'])) + '-' + str(len(inputs['review_input'])))
+print('Output size: ' + str(len(labels)))
+labels = keras.utils.to_categorical(labels, 6)
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
-              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+              dimensions=dimensions, inputs=inputs, labels=labels)
 # pretrain GMF
 GMF.train_gmf(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
-              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+              dimensions=dimensions, inputs=inputs, labels=labels)
 
 # check out the shared vision guide at https://keras.io/getting-started/functional-api-guide/
 user_input = Input(shape=(1,), name='user_input')

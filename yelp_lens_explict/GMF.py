@@ -57,10 +57,6 @@ def train_gmf(num_predictive_factors, batch_size, epochs, dimensions, inputs, la
     np.save('GMF_WE/GMF_item_embed.npy', item_embed_weights)
     np.save('GMF_WE/GMF_output_layer.npy', main_output_weights)
 
-    hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate',
-                                                          'input/int_mat.npy')
-    print('accuracy rate of: ' + str(hit_rate_accuracy))
-
 
 if __name__ == '__main__':
     try:
