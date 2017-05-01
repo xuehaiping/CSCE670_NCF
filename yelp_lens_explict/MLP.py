@@ -42,7 +42,7 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
     mlp_3 = Dense(num_predictive_factors, activation='relu',
                   # W_regularizer = l2(0.01),
                   name='mlp_3')(mlp_2)
-    main_output = Dense(5,
+    main_output = Dense(6,
                         # W_regularizer = l2(0.01),
                         activation='softmax', init='lecun_uniform', name='main_output')(mlp_3)
     if pretrain:
@@ -54,7 +54,7 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
 
 def train_mlp(num_predictive_factors,batch_size, epochs, dimensions, inputs, labels):
     pretrain_model = create_model(num_users=dimensions[0],
-                                  num_items=dimensions.shape[1],
+                                  num_items=dimensions[1],
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
     pretrain_model.compile(optimizer='Adam',
@@ -73,8 +73,6 @@ def train_mlp(num_predictive_factors,batch_size, epochs, dimensions, inputs, lab
     np.save('MLP_WE/mlp_user_embed_weights', pretrain_model.get_layer('MLP_user_embed').get_weights())
     np.save('MLP_WE/mlp_item_embed_weights', pretrain_model.get_layer('MLP_item_embed').get_weights())
 
-    hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
-    print('MLP produces accuracy rate of: ' + str(hit_rate_accuracy))
 
 if __name__ == '__main__':
     try:

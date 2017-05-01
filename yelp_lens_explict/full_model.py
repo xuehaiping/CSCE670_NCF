@@ -69,7 +69,7 @@ par2vec3 = Dense(num_predictive_factors, activation='relu',
 # ----- Total Model -----
 gmf_mlp_par2vec_concatenated = concatenate([mlp_output, gmf_output,par2vec3], axis=1)
 NeuMF = Dense(num_predictive_factors * 3, activation='sigmoid', name='NeuMF')(gmf_mlp_par2vec_concatenated)
-NeuMF_main_output = Dense(5, activation='softmax', name='NeuMF_main_output')(NeuMF)
+NeuMF_main_output = Dense(6, activation='softmax', name='NeuMF_main_output')(NeuMF)
 model = Model(inputs=[user_input, item_input, review_input], output=NeuMF_main_output)
 
 model = load_weights(model)
