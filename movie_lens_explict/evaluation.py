@@ -9,15 +9,23 @@ def hit_rate(sorted_predictions, target_movie, target_rating):
     if target_movie in movies:
         return True
 
+##find the rating from possibile matrix
+def find_rating(mx):
+    highest = sorted(mx, reverse=True)[0]
+    return mx.index(highest)
+
 def dcg(ratings):
-    #The first i+1 is because enumerate starts at 0
-    dcg_values = [(v/log(i+1+1, 2)) for i,v in enumerate(ratings)]
+    # The first i+1 is because enumerate starts at 0
+    dcg_values = [(v / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
     return np.sum(dcg_values)
 
-#Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
+
+# Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
 # are ratings for the same movies in the same order but maybe with different values.
-def ndcg( ideal_testing_ratings, predicted_ratings ): 
-    return dcg(predicted_ratings)/ dcg(ideal_testing_ratings)
+def ndcg(ideal_testing_ratings, predicted_ratings):
+    real_ranking = sorted(zip(ideal_testing_ratings, predicted_ratings),reverse=True, key = lambda tp: tp[1])
+    real_ranking = [tp[0] for tp in real_ranking]
+    return dcg(real_ranking) / dcg(ideal_testing_ratings)
 
 def evaluate_rmse(model):
     testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
@@ -59,7 +67,7 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         # Sort movies by rating in decreasing order. So movie_vectors, rating_vectors and user_vectors
         movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i]) for i, v in
                                     enumerate(movie_vectors)]
-        sorted_tuples = sorted(movie_rating_user_tuples, key=lambda item: item[1])
+        sorted_tuples = sorted(movie_rating_user_tuples, key=lambda item: item[1], reverse=True)
 
         # Put them back to arrays so we can pass to the NDCG function an ideal ratings vector
         # We do this right before predict, so the predicted labels are returned in this same way, so we only need to pass it to ndcg
@@ -71,16 +79,20 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
         # generate predictions. This predictions are in the same order as movie_vectors, so we can pass it as it is to the ndcg function
         predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
         # predictions_idx = dict(zip(movie_vectors, predictions))
-
         # Sorted by ratings
         # sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
         
+        highest_predictions = []
+        for row in predictions:
+            highest_predictions.append(find_rating(list(row)))
+                    
         if metric == 'hit_rate':
             raise StandardError('Hit rate not suported for rankings"')
             # if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
             # summation += 1
         elif metric == 'ndcg':
-            summation += ndcg(target_ratings[idx + 1], predictions)
+            summation += ndcg(rating_vectors, highest_predictions)
         else:
             raise StandardError('metric has to be "ndcg"')
     return summation / float(int_matrix.shape[0])
+
