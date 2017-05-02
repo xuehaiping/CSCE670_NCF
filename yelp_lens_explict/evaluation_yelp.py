@@ -20,12 +20,25 @@ def dcg(ratings):
     dcg_values = [((2 ** v - 1) / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
     return np.sum(dcg_values)
 
-def evaluate_rmse(model):
-    testing_input, testing_labels = data_management_yelp.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
-    #score = model.evaluate(testing_input, testing_labels)
-    #score[0]==loss, score[1]==accuracy
-    predicted_labels = model.predict(testing_input)
-    rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
+def evaluate_rmse(fname,reviews, model):
+    testing_ratings = []
+    testing_movies = []
+    testing_users = []
+    testing_reviews = []
+
+    lines = np.load(fname)
+    reviews = np.load(reviews)
+    for index, line in enumerate(lines):
+        testing_users.append(line[0])
+        testing_movies.append(line[1])
+        testing_ratings.append(line[2])
+        testing_reviews.append(reviews[index])
+        
+    predicted_labels = model.predict({'user_input': np.array(testing_users), 'item_input': np.array(testing_movies), 'review_input': np.array(testing_reviews)})
+    
+    p = predicted_labels.T
+    
+    rmse = np.sqrt(np.mean(np.square(p[0] - testing_ratings)))
     return rmse
 
 # Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
@@ -34,14 +47,6 @@ def ndcg(ideal_testing_ratings, predicted_ratings):
     real_ranking = sorted(zip(ideal_testing_ratings, predicted_ratings),reverse=True, key = lambda tp: tp[1])
     real_ranking = [tp[0] for tp in real_ranking]
     return dcg(real_ranking) / dcg(ideal_testing_ratings)
-
-def evaluate_rmse(model):
-    testing_input, testing_labels = data_management_yelp.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
-    #score = model.evaluate(testing_input, testing_labels)
-    #score[0]==loss, score[1]==accuracy
-    predicted_labels = model.predict(testing_input)
-    rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
-    return rmse
 
 def evaluate_integer_input(fname, model, metric, reviews):
     target_movies = {}
