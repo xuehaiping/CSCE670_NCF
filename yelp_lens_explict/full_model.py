@@ -113,6 +113,6 @@ with open(file_name,'w+') as ofile:
     #ofile.write(hit)
     n = "NDCG: " + str(ndcg) + '\n'
     ofile.write(n)
-
+print(ndcg)
 model_name = 'output_model/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
 model.save(model_name)
