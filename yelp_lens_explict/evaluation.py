@@ -43,12 +43,12 @@ def evaluate_rmse(model):
     rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
     return rmse
 
-def evaluate_integer_input(fname, model, metric, interactions_matrix):
+def evaluate_integer_input(fname, model, metric):
     target_movies = {}
     target_ratings = {}
-    int_matrix = np.load(interactions_matrix)
-    int_matrix = np.delete(int_matrix, 0, 0)
-    int_matrix = np.delete(int_matrix, 0, 1)
+    #int_matrix = np.load(interactions_matrix)
+    #int_matrix = np.delete(int_matrix, 0, 0)
+    #int_matrix = np.delete(int_matrix, 0, 1)
 
     lines = np.load(fname)
     #control = 0
@@ -67,17 +67,17 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
 
     summation = 0
     # int_matrix == [[ 0.  0.  1. ...,  0.  0.  4.]]
-
-    for idx, user in enumerate(int_matrix):
+    
+    for user, movie in target_movies.iteritems():
         # User is a row build from movie's ratings (rather than only 1's)
         # transform into inputs for keras
 
-        movie_vectors = target_movies[idx + 1]
-        rating_vectors = target_ratings[idx + 1]
-        user_vectors = np.repeat([idx + 1], len(rating_vectors), axis=0)
+        movie_vectors = target_movies[user]
+        rating_vectors = target_ratings[user]
+        user_vectors = np.repeat([user], len(rating_vectors), axis=0)
 
-        movie_vectors_non_sorted = movie_vectors
-        rating_vectors_non_sorte = rating_vectors
+        #movie_vectors_non_sorted = movie_vectors
+        #rating_vectors_non_sorte = rating_vectors
 
         # Sort movies by rating in decreasing order. So movie_vectors, rating_vectors and user_vectors
         movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i]) for i, v in
@@ -107,14 +107,14 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
             # summation += 1
         elif metric == 'ndcg':
             summation += ndcg(rating_vectors, highest_predictions)
-            if 10< idx < 30:
-                print "rating vectors" + str(rating_vectors)
-                print "predictions" + str(predictions)
-                print "highest predictions" + str(highest_predictions)
-                print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
-                print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
+            #if 10< idx < 30:
+                #print "rating vectors" + str(rating_vectors)
+                #print "predictions" + str(predictions)
+                #print "highest predictions" + str(highest_predictions)
+                #print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
+                #print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 
         else:
             raise StandardError('metric has to be "ndcg"')
-    return summation / float(int_matrix.shape[0])
+    return summation / float(len(target_movies.keys()))
 
