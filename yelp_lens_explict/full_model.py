@@ -106,6 +106,9 @@ model.compile(optimizer='sgd',
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
 ndcg = evaluation_yelp.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/testing_reviews.npy')
+rmse = evaluation_yelp.evaluate_rmse('input/testing_data.npy','input/testing_reviews.npy',model)
+print("NDCG: " + str(ndcg))
+print("RMSE: " + str(rmse))
 
 file_name = 'output/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs)
 with open(file_name,'w+') as ofile:
