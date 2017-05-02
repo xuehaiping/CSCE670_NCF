@@ -1,0 +1,12 @@
+#!/bin/bash
+# script for running different paramters, has to be excuted under virtue environment
+
+source activate jupyterHub
+
+python2 full_model.py -p 8 -b 256 -e 20
+
+python2 full_model.py -p 16 -b 256 -e 20
+
+python2 full_model.py -p 32 -b 256 -e 20
+
+python2 full_model.py -p 64 -b 256 -e 20

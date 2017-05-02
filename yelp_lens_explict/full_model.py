@@ -2,7 +2,7 @@ import MLP, GMF, data_management_yelp, evaluation_yelp, doc2vec
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
-import sys, getopt
+import sys, getopt, os.path
 import keras
 
 def load_weights(model):
@@ -30,21 +30,30 @@ num_pretrain_epochs = 2
 opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
 for opt, arg in opts:
     if opt in ("-p", "--pfactor"):
-        num_predictive_factors = arg
+        num_predictive_factors = int(arg)
         print "Number of predictive factors is " + str(num_predictive_factors)
     elif opt in ("-b", "--bsize"):
-        batch_size = arg
+        batch_size = int(arg)
         print "Batch size is " + str(batch_size)
     elif opt in ("-e", "--epoch"):
-        num_pretrain_epochs = arg
+        num_pretrain_epochs = int(arg)
         print "number of training epochs for pretrain and full model is " + str(num_pretrain_epochs)
 
 num_final_epochs = num_pretrain_epochs
-
-data_management_yelp.prune_data('../data/yelp/yelp.dat','../data/yelp/yelp_pruned_20.dat', 20, 0.5)
-doc2vec.doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
-data_management_yelp.load_data(file_path='../data/yelp/yelp_pruned_20.dat', review_file_path='input/docvecs.npy')
-dimensions = np.load('input/dimensions.npy')
+formatted_yelp_data = '../data/yelp/yelp.dat'
+pruned_yelp_data = '../data/yelp/yelp_pruned_20.dat'
+all_docvecs = 'input/docvecs.npy'
+dimensions_file = 'input/dimensions.npy'
+# TODO: improve this
+if not os.path.isfile(pruned_yelp_data):
+    data_management_yelp.prune_data(formatted_yelp_data,pruned_yelp_data, 20, 0.5)
+    doc2vec.doc2vec(pruned_yelp_data, all_docvecs)
+if not os.path.isfile(all_docvecs):
+    doc2vec.doc2vec(pruned_yelp_data, all_docvecs)
+    data_management_yelp.load_data(file_path=pruned_yelp_data, review_file_path=all_docvecs)
+if not os.path.isfile(dimensions_file):
+    data_management_yelp.load_data(file_path=pruned_yelp_data, review_file_path=all_docvecs)
+dimensions = np.load(dimensions_file)
 inputs, labels = data_management_yelp.training_data_generation('input/training_data.npy', 'input/training_reviews.npy')
 
 

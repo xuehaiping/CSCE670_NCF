@@ -122,7 +122,7 @@ def load_data(file_path, review_file_path):
         movie_list = sorted(user_dict[user], key=lambda movie: movie[2], reverse=True)
         test_user[user] = []
         # pull five movie out
-        for i in range(0, 5):
+        for i in range(0, 10):
             test_user[user].append([movie_list[0][0], movie_list[0][1], movie_list[0][3]])
             movie_list.pop(0)
         # add the training data to dictionary
