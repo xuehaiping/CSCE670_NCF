@@ -28,7 +28,7 @@ def create_model(num_users, num_items, num_predictive_factors, pretrain):
                                      embeddings_initializer=initializers.RandomNormal(mean=0.0, stddev=0.01,
                                                                                       seed=None))(item_input))
     GMF_merged_embed = multiply([user_embed, item_embed])
-    main_output = Dense(6, activation='softmax', name='main_output')(GMF_merged_embed)
+    main_output = Dense(1, activation='relu', name='main_output')(GMF_merged_embed)
 
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)
@@ -43,7 +43,7 @@ def train_gmf(num_predictive_factors, batch_size, epochs, interaction_mx, inputs
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
 
-    pretrain_model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    pretrain_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
 
     pretrain_model.fit(inputs, labels, batch_size, epochs)
 

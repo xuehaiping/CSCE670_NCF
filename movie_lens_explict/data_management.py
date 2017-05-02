@@ -8,12 +8,10 @@ def training_data_generation(fname, int_mx):
     labels = []
     neg_sample_num = 0
     lines = np.load(fname)
-    int_mx = np.load(int_mx)
     for data in lines:
         user_in.append(data[0])
         movie_in.append(data[1])
-        labels.append(int_mx[data[0]][data[1]])
-
+        labels.append(data[2])
     return {'user_input': np.array(user_in), 'item_input': np.array(movie_in)}, np.array(labels)
 
 #create index dictionary for an list
@@ -88,7 +86,7 @@ def load_data(file_path='../data/ratings.dat'):
         movie_list = sorted(user_dict[user], key=lambda movie: movie[2], reverse=True)
         test_user[user] = []
         # pull five movie out
-        for i in range(0, 10):
+        for i in range(0, 5):
             test_user[user].append([movie_list[0][0], movie_list[0][1]])
             movie_list.pop(0)
         # add the training data to dictionary

@@ -45,7 +45,8 @@ num_final_epochs = num_pretrain_epochs
 data_management.load_data()
 interaction_mx = np.load('input/int_mat.npy')
 inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy')
-labels = keras.utils.to_categorical(labels, 6)
+#print labels.shape
+#labels = keras.utils.to_categorical(labels, 6)
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
               interaction_mx=interaction_mx, inputs=inputs, labels=labels)
@@ -76,27 +77,28 @@ gmf_output = gmf([user_input, item_input])
 
 # ----- Total Model -----
 gmf_mlp_concatenated = concatenate([mlp_output, gmf_output], axis=1)
-NeuMF = Dense(num_predictive_factors * 2, activation='sigmoid', name='NeuMF')(gmf_mlp_concatenated)
-NeuMF_main_output = Dense(6, activation='softmax', name='NeuMF_main_output')(NeuMF)
+NeuMF = Dense(num_predictive_factors * 2, activation='relu', name='NeuMF')(gmf_mlp_concatenated)
+NeuMF_main_output = Dense(1, activation='relu', name='NeuMF_main_output')(NeuMF)
 model = Model(inputs=[user_input, item_input], output=NeuMF_main_output)
 
 model = load_weights(model)
 
-model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
+model.compile(optimizer='sgd',loss='mean_squared_error',metrics=['accuracy'])
 
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
 ndcg = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/int_mat.npy')
 
+rmse = evaluation.evaluate_rmse('input/testing_data.npy', model)
+
 file_name = 'output/movie_lens_ex_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs)
+
 with open(file_name,'w+') as ofile:
     n = "NDCG: " + str(ndcg) + '\n'
     ofile.write(n)
+    m = "RMSE: " + str(rmse) + '\n'
+    ofile.write(m)
+ofile.close()
 
 model_name = 'output_model/movie_lens_ex_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
 model.save(model_name)
-
-
-#hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
-#print('accuracy rate of: ' + str(hit_rate_accuracy))
-#model.save('final_model.h5')

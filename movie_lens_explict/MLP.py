@@ -4,7 +4,6 @@ import numpy as np
 import evaluation
 import data_management
 from keras import initializers
-import keras
 
 def create_model(num_users, num_items, num_predictive_factors,pretrain):
     #def init_normal( name=None):
@@ -41,9 +40,9 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
     mlp_3 = Dense(num_predictive_factors, activation='relu',
                   # W_regularizer = l2(0.01),
                   name='mlp_3')(mlp_2)
-    main_output = Dense(6,
+    main_output = Dense(1,
                         # W_regularizer = l2(0.01),
-                        activation='softmax', init='lecun_uniform', name='main_output')(mlp_3)
+                        activation='relu', init='lecun_uniform', name='main_output')(mlp_3)
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)
     else:
@@ -57,7 +56,7 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
 
-    pretrain_model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
+    pretrain_model.compile(optimizer='Adam',loss='mean_squared_error',metrics=['accuracy'])
 
 
     pretrain_model.fit(inputs, labels, batch_size, epochs)
