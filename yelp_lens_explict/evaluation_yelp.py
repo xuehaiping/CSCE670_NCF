@@ -17,7 +17,7 @@ def find_rating(mx):
 
 def dcg(ratings):
     # The first i+1 is because enumerate starts at 0
-    dcg_values = [(v / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
+    dcg_values = [((2 ** v - 1) / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
     return np.sum(dcg_values)
 
 def evaluate_rmse(model):
@@ -97,25 +97,26 @@ def evaluate_integer_input(fname, model, metric, reviews):
 
         # generate predictions. This predictions are in the same order as movie_vectors, so we can pass it as it is to the ndcg function
         predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors), 'review_input': np.array(review_vectors)})
+        print(predictions)
         # predictions_idx = dict(zip(movie_vectors, predictions))
         # Sorted by ratings
         # sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
 
-        highest_predictions = []
-        for row in predictions:
-            highest_predictions.append(find_rating(list(row)))
+        #highest_predictions = []
+        #for row in predictions:
+        #    highest_predictions.append(find_rating(list(row)))
 
         if metric == 'hit_rate':
             raise StandardError('Hit rate not suported for rankings"')
             # if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
             # summation += 1
         elif metric == 'ndcg':
-            summation += ndcg(rating_vectors, highest_predictions)
-            if 10< user < 30:
-                print "rating vectors     " + str(rating_vectors)
-                #print "predictions" + str(predictions)
-                print "highest predictions" + str(highest_predictions)
-                print('--------')
+            summation += ndcg(rating_vectors, predictions)
+            #if 10< user < 30:
+            #    print "rating vectors     " + str(rating_vectors)
+            #    #print "predictions" + str(predictions)
+            #    print "highest predictions" + str(highest_predictions)
+            #    print('--------')
                 #print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
                 #print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 
