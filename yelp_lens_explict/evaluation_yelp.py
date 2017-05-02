@@ -1,5 +1,5 @@
 import numpy as np
-import operator, data_management
+import operator, data_management_yelp
 from math import log
 from operator import div
 
@@ -21,7 +21,7 @@ def dcg(ratings):
     return np.sum(dcg_values)
 
 def evaluate_rmse(model):
-    testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
+    testing_input, testing_labels = data_management_yelp.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
     #score = model.evaluate(testing_input, testing_labels)
     #score[0]==loss, score[1]==accuracy
     predicted_labels = model.predict(testing_input)
@@ -36,37 +36,34 @@ def ndcg(ideal_testing_ratings, predicted_ratings):
     return dcg(real_ranking) / dcg(ideal_testing_ratings)
 
 def evaluate_rmse(model):
-    testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
+    testing_input, testing_labels = data_management_yelp.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
     #score = model.evaluate(testing_input, testing_labels)
     #score[0]==loss, score[1]==accuracy
     predicted_labels = model.predict(testing_input)
     rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
     return rmse
 
-def evaluate_integer_input(fname, model, metric):
+def evaluate_integer_input(fname, model, metric, reviews):
     target_movies = {}
     target_ratings = {}
-    #int_matrix = np.load(interactions_matrix)
-    #int_matrix = np.delete(int_matrix, 0, 0)
-    #int_matrix = np.delete(int_matrix, 0, 1)
+    target_reviews = {}
+
 
     lines = np.load(fname)
-    #control = 0
-    for line in lines:
-        #control += 1;
-        #if control < 10:
-            #print line
+    reviews = np.load(reviews)
+    for index, line in enumerate(lines):
         if line[0] not in target_movies.keys():
             target_movies[line[0]] = [line[1]]
             target_ratings[line[0]] = [line[2]]
+            target_reviews[line[0]] = [reviews[index]]
 
 
         else:
             target_movies[line[0]].append(line[1])
             target_ratings[line[0]].append(line[2])
+            target_reviews[line[0]].append(reviews[index])
 
     summation = 0
-    # int_matrix == [[ 0.  0.  1. ...,  0.  0.  4.]]
     
     for user, movie in target_movies.iteritems():
         # User is a row build from movie's ratings (rather than only 1's)
@@ -74,13 +71,14 @@ def evaluate_integer_input(fname, model, metric):
 
         movie_vectors = target_movies[user]
         rating_vectors = target_ratings[user]
+        review_vectors = target_reviews[user]
         user_vectors = np.repeat([user], len(rating_vectors), axis=0)
 
         #movie_vectors_non_sorted = movie_vectors
         #rating_vectors_non_sorte = rating_vectors
 
         # Sort movies by rating in decreasing order. So movie_vectors, rating_vectors and user_vectors
-        movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i]) for i, v in
+        movie_rating_user_tuples = [(movie_vectors[i], rating_vectors[i], user_vectors[i], review_vectors[i]) for i, v in
                                     enumerate(movie_vectors)]
         sorted_tuples = sorted(movie_rating_user_tuples, key=lambda item: item[1], reverse=True)
 
@@ -90,9 +88,15 @@ def evaluate_integer_input(fname, model, metric):
             movie_vectors[i] = v[0]
             rating_vectors[i] = v[1]
             user_vectors[i] = v[2]
+            review_vectors[i] = v[3]
+            #print('rating vector length:' + str(len(rating_vectors)))
+            #print('rating_vectors[0]: ' + str(rating_vectors[0]))
+            #print('review vector length: ' + str(len(review_vectors)))
+            #print('review_vectors[0]: ' + str(review_vectors[0]))
+            #print('total review_vector: ' + str(review_vectors))
 
         # generate predictions. This predictions are in the same order as movie_vectors, so we can pass it as it is to the ndcg function
-        predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors)})
+        predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors), 'review_input': np.array(review_vectors)})
         # predictions_idx = dict(zip(movie_vectors, predictions))
         # Sorted by ratings
         # sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
@@ -107,10 +111,11 @@ def evaluate_integer_input(fname, model, metric):
             # summation += 1
         elif metric == 'ndcg':
             summation += ndcg(rating_vectors, highest_predictions)
-            #if 10< idx < 30:
-                #print "rating vectors" + str(rating_vectors)
+            if 10< user < 30:
+                print "rating vectors     " + str(rating_vectors)
                 #print "predictions" + str(predictions)
-                #print "highest predictions" + str(highest_predictions)
+                print "highest predictions" + str(highest_predictions)
+                print('--------')
                 #print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
                 #print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 

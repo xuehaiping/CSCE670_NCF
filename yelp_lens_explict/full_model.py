@@ -1,4 +1,4 @@
-import MLP, GMF, data_management, evaluation
+import MLP, GMF, data_management_yelp, evaluation_yelp
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
@@ -43,9 +43,9 @@ num_final_epochs = num_pretrain_epochs
 
 
 
-data_management.load_data()
+data_management_yelp.load_data()
 dimensions = np.load('input/dimensions.npy')
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+inputs, labels = data_management_yelp.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
 
 
 # pretrain MLP

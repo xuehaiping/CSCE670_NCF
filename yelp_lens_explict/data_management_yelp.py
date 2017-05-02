@@ -173,5 +173,6 @@ def load_data(file_path, review_file_path):
 if __name__ == '__main__':
      #prune_data('../data/yelp/yelp.dat',
      #         '../data/yelp/yelp_pruned_20.dat', 20, 0.1)
-     load_data(file_path='../data/yelp/yelp_pruned_20.dat',
-              review_file_path='input/docvecs.npy')
+     #load_data(file_path='../data/yelp/yelp_pruned_20.dat',
+     #         review_file_path='input/docvecs.npy')
+     training_data_generation('input/training_data.npy', 'input/training_reviews.npy')

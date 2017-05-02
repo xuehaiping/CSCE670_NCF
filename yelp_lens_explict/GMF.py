@@ -1,8 +1,8 @@
 from keras.models import Model
 from keras.layers import Dense, Activation, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
-import evaluation
-import data_management
+import evaluation_yelp
+import data_management_yelp
 import keras.layers as layers
 from keras import initializers
 import keras
@@ -62,10 +62,10 @@ if __name__ == '__main__':
     try:
         dimensions = np.load('input/dimensions.npy')
     except IOError:
-        data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat',
-                                  review_file_path='input/docvecs.npy')
+        data_management_yelp.load_data(file_path='../data/yelp/yelp_pruned_20.dat',
+                                       review_file_path='input/docvecs.npy')
         dimensions = np.load('input/dimensions.npy')
-    inputs, labels = data_management.training_data_generation(fname='input/training_data.npy', reviews_input='input/docvecs.npy')
+    inputs, labels = data_management_yelp.training_data_generation(fname='input/training_data.npy', reviews_input='input/docvecs.npy')
     #data_management.load_data(file_path='../data/movielens/ratings.dat')
     train_gmf(num_predictive_factors=8, batch_size=256, epochs=2,
               dimensions=dimensions, inputs=inputs, labels=labels)
