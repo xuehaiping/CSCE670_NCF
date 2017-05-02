@@ -1,4 +1,4 @@
-import MLP, GMF, data_management_yelp, evaluation_yelp
+import MLP, GMF, data_management_yelp, evaluation_yelp, doc2vec
 from keras.models import Model
 from keras.layers import Dense, Embedding, Input, concatenate, multiply, Flatten
 import numpy as np
@@ -41,11 +41,11 @@ for opt, arg in opts:
 
 num_final_epochs = num_pretrain_epochs
 
-
-
-data_management_yelp.load_data()
+data_management_yelp.prune_data('../data/yelp/yelp.dat','../data/yelp/yelp_pruned_20.dat', 20, 0.5)
+doc2vec.doc2vec('../data/yelp/yelp_pruned_20.dat', 'input/docvecs.npy')
+data_management_yelp.load_data(file_path='../data/yelp/yelp_pruned_20.dat', review_file_path='input/docvecs.npy')
 dimensions = np.load('input/dimensions.npy')
-inputs, labels = data_management_yelp.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+inputs, labels = data_management_yelp.training_data_generation('input/training_data.npy', 'input/training_reviews.npy')
 
 
 # pretrain MLP
@@ -97,4 +97,14 @@ model.compile(optimizer='sgd',
 labels = keras.utils.to_categorical(labels, 6)
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
-model.save('final_model.h5')
+ndcg = evaluation_yelp.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/testing_reviews.npy')
+
+file_name = 'output/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs)
+with open(file_name,'w+') as ofile:
+    #hit = "hit rate: " + str(hit_rate_accuracy) +'\n'
+    #ofile.write(hit)
+    n = "NDCG: " + str(ndcg) + '\n'
+    ofile.write(n)
+
+model_name = 'output_model/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
+model.save(model_name)
