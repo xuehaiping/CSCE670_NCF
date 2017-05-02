@@ -31,6 +31,10 @@
 - Sample four negative instance per positive instance
 - Last layer of NCF = predictive factors, evaluated at [8,16,32,64]
 
+### doc2vec
+- using review text to predict rating starts
+- currently using data from homework 3
+- running effiency: 2 minutes finish 10,000 review texts
 
 
 # Running Details

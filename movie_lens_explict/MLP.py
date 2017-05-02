@@ -57,7 +57,8 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
 
-    pretrain_model.compile(optimizer='Adam',loss='categorical_crossentropy',metrics=['accuracy'])
+    pretrain_model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
+
 
     pretrain_model.fit(inputs, labels, batch_size, epochs)
 
@@ -70,6 +71,7 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
     np.save('MLP_WE/mlp_3_weights', pretrain_model.get_layer('mlp_3').get_weights())
     np.save('MLP_WE/mlp_user_embed_weights', pretrain_model.get_layer('MLP_user_embed').get_weights())
     np.save('MLP_WE/mlp_item_embed_weights', pretrain_model.get_layer('MLP_item_embed').get_weights())
+
 
     #hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'hit_rate', 'input/int_mat.npy')
     #ndcg_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', pretrain_model, 'ndcg', 'input/int_mat.npy')
@@ -87,3 +89,4 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
 #     inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
 #     train_mlp(num_predictive_factors=8, batch_size=256, epochs=2,
 #               interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+
