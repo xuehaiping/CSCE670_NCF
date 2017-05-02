@@ -97,7 +97,6 @@ def evaluate_integer_input(fname, model, metric, reviews):
 
         # generate predictions. This predictions are in the same order as movie_vectors, so we can pass it as it is to the ndcg function
         predictions = model.predict({'user_input': np.array(user_vectors), 'item_input': np.array(movie_vectors), 'review_input': np.array(review_vectors)})
-        print(predictions)
         # predictions_idx = dict(zip(movie_vectors, predictions))
         # Sorted by ratings
         # sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
@@ -111,12 +110,13 @@ def evaluate_integer_input(fname, model, metric, reviews):
             # if hit_rate(sorted_predictions, target_movies[idx], target_ratings[idx]):
             # summation += 1
         elif metric == 'ndcg':
-            summation += ndcg(rating_vectors, predictions)
-            #if 10< user < 30:
-            #    print "rating vectors     " + str(rating_vectors)
-            #    #print "predictions" + str(predictions)
+            predictions = predictions.T
+            summation += ndcg(rating_vectors, predictions[0])
+            if 10< user < 30:
+                print "rating vectors     " + str(rating_vectors)
+                print "predictions" + str(predictions)
             #    print "highest predictions" + str(highest_predictions)
-            #    print('--------')
+                print('--------')
                 #print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
                 #print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 
