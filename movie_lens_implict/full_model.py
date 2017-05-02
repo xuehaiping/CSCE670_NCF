@@ -30,13 +30,13 @@ num_pretrain_epochs = 2
 opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
 for opt, arg in opts:
     if opt in ("-p", "--pfactor"):
-        num_predictive_factors = arg
+        num_predictive_factors = int(arg)
         print "Number of predictive factors is " + str(num_predictive_factors)
     elif opt in ("-b", "--bsize"):
-        batch_size = arg
+        batch_size = int(arg)
         print "Batch size is " + str(batch_size)
     elif opt in ("-e", "--epoch"):
-        num_pretrain_epochs = arg
+        num_pretrain_epochs = int(arg)
         print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
 
 num_final_epochs = num_pretrain_epochs
@@ -87,5 +87,17 @@ model.compile(optimizer='sgd',
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
 hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
-print('accuracy rate of: ' + str(hit_rate_accuracy))
-model.save('final_model.h5')
+ndcg = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/int_mat.npy')
+#print('accuracy rate of: ' + str(hit_rate_accuracy))
+# num_predictive_factors = 8
+# batch_size = 256
+# num_pretrain_epochs = 2
+file_name = 'output/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs)
+with open(file_name,'w+') as ofile:
+    hit = "hit rate: " + str(hit_rate_accuracy) +'\n'
+    ofile.write(hit)
+    n = "NDCG: " + str(ndcg) + '\n'
+    ofile.write(n)
+
+model_name = 'output_model/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
+model.save(model_name)
