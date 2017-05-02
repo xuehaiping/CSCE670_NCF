@@ -20,14 +20,6 @@ def dcg(ratings):
     dcg_values = [(v / log(i + 1 + 1, 2)) for i, v in enumerate(ratings)]
     return np.sum(dcg_values)
 
-def evaluate_rmse(model):
-    testing_input, testing_labels = data_management.training_data_generation('input/testing_data.npy', 'input/int_mat.npy', 5)
-    #score = model.evaluate(testing_input, testing_labels)
-    #score[0]==loss, score[1]==accuracy
-    predicted_labels = model.predict(testing_input)
-    rmse = np.sqrt(np.mean(np.square(predicted_labels - testing_labels)))
-    return rmse
-
 # Make sure predicted_ratings order matches the order for ideal_testing_ratings. In other words, make sure that both
 # are ratings for the same movies in the same order but maybe with different values.
 def ndcg(ideal_testing_ratings, predicted_ratings):
@@ -107,12 +99,12 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
             # summation += 1
         elif metric == 'ndcg':
             summation += ndcg(rating_vectors, highest_predictions)
-            if 10< idx < 30:
-                print "rating vectors" + str(rating_vectors)
-                print "predictions" + str(predictions)
-                print "highest predictions" + str(highest_predictions)
-                print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
-                print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
+            #if 10< idx < 30:
+                #print "rating vectors" + str(rating_vectors)
+                #print "predictions" + str(predictions)
+                #print "highest predictions" + str(highest_predictions)
+                #print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
+                #print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 
         else:
             raise StandardError('metric has to be "ndcg"')

@@ -87,5 +87,9 @@ model.compile(optimizer='sgd',
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
 hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
-print('accuracy rate of: ' + str(hit_rate_accuracy))
+print('Hit rate score: ' + str(hit_rate_accuracy))
+
+ndcg_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/int_mat.npy')
+print('NDCG score: ' + str(ndcg_accuracy))
+
 model.save('final_model.h5')
