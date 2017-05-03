@@ -37,9 +37,9 @@ def create_model(num_users, num_items, num_predictive_factors, pretrain):
     return model
 
 
-def train_gmf(num_predictive_factors, batch_size, epochs, interaction_mx, inputs, labels):
-    pretrain_model = create_model(num_users=interaction_mx.shape[0],
-                                  num_items=interaction_mx.shape[1],
+def train_gmf(num_predictive_factors, batch_size, epochs, dimensions, inputs, labels):
+    pretrain_model = create_model(num_users=dimensions[0],
+                                  num_items=dimensions[1],
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
     pretrain_model.compile(optimizer='Adam',
@@ -70,4 +70,4 @@ if __name__ == '__main__':
     inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
     data_management.load_data(file_path='../data/movielens/ratings.dat')
     train_gmf(num_predictive_factors=8, batch_size=256, epochs=2,
-              interaction_mx=interaction_mx, inputs=inputs, labels=labels)
+              dimensions=interaction_mx, inputs=inputs, labels=labels)

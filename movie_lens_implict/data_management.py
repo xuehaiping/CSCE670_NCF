@@ -1,14 +1,13 @@
 import numpy as np
 
 ##this block's functions are created for preprocess and training data generation 
-
-def training_data_generation(fname, int_mx, times):
+# TODO: the problem with this is that we're only sampling from the negative samples
+def training_data_generation(fname, negatives, times):
     user_in = []
     movie_in = []
     labels = []
-    neg_sample_num = 0
     lines = np.load(fname)
-    int_mx = np.load(int_mx)
+    negatives = np.load(negatives)
     # generate postive data
     neg_sample_num = len(lines) * times
     for data in lines:
@@ -16,10 +15,8 @@ def training_data_generation(fname, int_mx, times):
         movie_in.append(data[1])
         labels.append(1)
     # generate random samples
-    row, column = np.where(int_mx == 0)
-    indices = list(zip(row, column))
-    np.random.shuffle(indices)
-    random_indices = indices[0:neg_sample_num]
+    np.random.shuffle(negatives)
+    random_indices = negatives[0:neg_sample_num]
     for data in random_indices:
         user_in.append(data[0])
         movie_in.append(data[1])
@@ -90,10 +87,19 @@ def load_data(file_path='../data/ratings.dat'):
     # pick out the lastest movie the user watch and add it to test dictionary
     for user in user_dict:
         movie_list = sorted(user_dict[user], key=lambda movie: movie[1], reverse=True)
-        test_user[user] = movie_list[0][0]
+        test_user[user] = [movie_list[0][0]]
         movie_list.pop(0)
         movie_list = [movie[0] for movie in movie_list]
         user_dict[user] = set(movie_list)
+    negatives = []
+    # append negative sampling to test data
+    for user in test_user:
+        counter = 0
+        while counter < 100:
+            rand_item = (np.random.randint(1, max(movies)+1))
+            if rand_item not in user_dict[user]:
+                negatives.append([user, rand_item])
+                counter += 1
 
     # convert it back to list
     movies = list(movies)
@@ -111,11 +117,14 @@ def load_data(file_path='../data/ratings.dat'):
     # testing data
     test_pair = []
     for usr in test_user:
-        test_pair.append([usr,test_user[usr]])
+        for item in list(test_user[usr]):
+            test_pair.append([usr,item])
 
-    int_mat = interaction_matrix(user_dict,row_num,column_num)
+    #int_mat = interaction_matrix(user_dict,row_num,column_num)
     # add test data in the interaction matrix
-    add_one(test_user,int_mat)
-    np.save('input/int_mat', int_mat)
+    #add_one(test_user,int_mat)
+    #np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_pair)
-    np.save('input/testing_data', test_pair)
+    np.save('input/positive_testing_data', test_pair)
+    np.save('input/dimensions', [row_num, column_num])
+    np.save('input/negative_training_data', negatives)
