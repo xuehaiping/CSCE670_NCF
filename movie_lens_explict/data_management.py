@@ -1,29 +1,18 @@
 import numpy as np
-
+from random import randint
 ##this block's functions are created for preprocess and training data generation 
 
-def training_data_generation(fname, int_mx, times):
+def training_data_generation(fname, int_mx):
     user_in = []
     movie_in = []
     labels = []
     neg_sample_num = 0
     lines = np.load(fname)
     int_mx = np.load(int_mx)
-    # generate postive data
-    neg_sample_num = len(lines) * times
     for data in lines:
         user_in.append(data[0])
         movie_in.append(data[1])
         labels.append(int_mx[data[0]][data[1]])
-    # generate random samples
-    row, column = np.where(int_mx == 0)
-    indices = list(zip(row, column))
-    np.random.shuffle(indices)
-    random_indices = indices[0:neg_sample_num]
-    for data in random_indices:
-        user_in.append(data[0])
-        movie_in.append(data[1])
-        labels.append(0)
 
     return {'user_input': np.array(user_in), 'item_input': np.array(movie_in)}, np.array(labels)
 
@@ -132,3 +121,4 @@ def load_data(file_path='../data/ratings.dat'):
     np.save('input/int_mat', int_mat)
     np.save('input/training_data', user_item_triplet)
     np.save('input/testing_data', test_triplet)
+

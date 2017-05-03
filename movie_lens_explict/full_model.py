@@ -26,17 +26,19 @@ batch_size = 256
 num_pretrain_epochs = 2
 
 #p for predcit factors, b for batch size,e for epochs
-opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor=","bsize=", "epoch="])
+opts, args = getopt.getopt(sys.argv[1:],"p:b:e:", ["pfactor="   ,"bsize=", "epoch="])
 for opt, arg in opts:
     if opt in ("-p", "--pfactor"):
-        num_predictive_factors = arg
+        num_predictive_factors = int(arg)
         print "Number of predictive factors is " + str(num_predictive_factors)
     elif opt in ("-b", "--bsize"):
-        batch_size = arg
+        batch_size = int(arg)
         print "Batch size is " + str(batch_size)
     elif opt in ("-e", "--epoch"):
-        num_pretrain_epochs = arg
+
+        num_pretrain_epochs = int(arg)
         print "number of training epochs for pretrain and full model is " + str(num_pretrain_epochs)
+
 
 num_final_epochs = num_pretrain_epochs
 
@@ -44,7 +46,7 @@ num_final_epochs = num_pretrain_epochs
 
 data_management.load_data()
 interaction_mx = np.load('input/int_mat.npy')
-inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy', 5)
+inputs, labels = data_management.training_data_generation('input/training_data.npy', 'input/int_mat.npy')
 labels = keras.utils.to_categorical(labels, 6)
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
@@ -86,6 +88,17 @@ model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy
 
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
 
+ndcg = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'ndcg', 'input/int_mat.npy')
+
+file_name = 'output/movie_lens_ex_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs)
+with open(file_name,'w+') as ofile:
+    n = "NDCG: " + str(ndcg) + '\n'
+    ofile.write(n)
+
+model_name = 'output_model/movie_lens_ex_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
+model.save(model_name)
+
+
 #hit_rate_accuracy = evaluation.evaluate_integer_input('input/testing_data.npy', model, 'hit_rate', 'input/int_mat.npy')
 #print('accuracy rate of: ' + str(hit_rate_accuracy))
-model.save('final_model.h5')
+#model.save('final_model.h5')

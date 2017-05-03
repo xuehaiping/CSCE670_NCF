@@ -57,7 +57,6 @@ def train_mlp(num_predictive_factors,batch_size, epochs, interaction_mx, inputs,
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
 
-
     pretrain_model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
 
 

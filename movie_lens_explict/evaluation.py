@@ -107,12 +107,6 @@ def evaluate_integer_input(fname, model, metric, interactions_matrix):
             # summation += 1
         elif metric == 'ndcg':
             summation += ndcg(rating_vectors, highest_predictions)
-            if 10< idx < 30:
-                print "rating vectors" + str(rating_vectors)
-                print "predictions" + str(predictions)
-                print "highest predictions" + str(highest_predictions)
-                print "movie_vectors_non_sorted" + str(movie_vectors_non_sorted)
-                print "rating_vectors_non_sorte" + str(rating_vectors_non_sorte)
 
         else:
             raise StandardError('metric has to be "ndcg"')
