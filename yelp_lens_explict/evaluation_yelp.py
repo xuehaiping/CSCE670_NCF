@@ -105,7 +105,6 @@ def evaluate_integer_input(fname, model, metric, reviews):
         # predictions_idx = dict(zip(movie_vectors, predictions))
         # Sorted by ratings
         # sorted_predictions = sorted(predictions_idx.items(), key=operator.itemgetter(1), reverse= True)[0:5]
-
         #highest_predictions = []
         #for row in predictions:
         #    highest_predictions.append(find_rating(list(row)))

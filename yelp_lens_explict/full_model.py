@@ -55,7 +55,7 @@ if not os.path.isfile(dimensions_file):
     data_management_yelp.load_data(file_path=pruned_yelp_data, review_file_path=all_docvecs)
 dimensions = np.load(dimensions_file)
 inputs, labels = data_management_yelp.training_data_generation('input/training_data.npy', 'input/training_reviews.npy')
-
+print(labels[0:100])
 
 # pretrain MLP
 MLP.train_mlp(num_predictive_factors=num_predictive_factors, batch_size=batch_size, epochs=num_pretrain_epochs,
@@ -100,7 +100,7 @@ NeuMF_main_output = Dense(1, activation='relu', name='NeuMF_main_output')(NeuMF)
 model = Model(inputs=[user_input, item_input, review_input], output=NeuMF_main_output)
 
 model = load_weights(model)
-model.compile(optimizer='sgd',
+model.compile(optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True),
               loss='mean_squared_error',
               metrics=['accuracy'])
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)
@@ -115,7 +115,8 @@ with open(file_name,'w+') as ofile:
     #hit = "hit rate: " + str(hit_rate_accuracy) +'\n'
     #ofile.write(hit)
     n = "NDCG: " + str(ndcg) + '\n'
+    r = "RMSE: " + str(rmse) + '\n'
     ofile.write(n)
-print(ndcg)
+    ofile.write(r)
 model_name = 'output_model/movie_lens_' + 'p-' + str(num_predictive_factors) + 'b-' + str(batch_size) + 'e-' + str(num_pretrain_epochs) + '.h5'
 model.save(model_name)
