@@ -1,8 +1,8 @@
 from keras.models import Model
 from keras.layers import Dense, Input,concatenate, Flatten, Embedding
 import numpy as np
-import evaluation
-import data_management
+import evaluation_yelp
+import data_management_yelp
 from keras import initializers
 import keras
 
@@ -33,18 +33,18 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
                                      embeddings_initializer=initializers.RandomNormal(mean=0.0, stddev=0.01,
                                                                                       seed=None))(item_input))
     merged_embed = concatenate([user_embed, item_embed], axis=1)
-    mlp_1 = Dense(num_predictive_factors * 4, activation='relu',
+    mlp_1 = Dense(num_predictive_factors * 4, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_1')(merged_embed)
-    mlp_2 = Dense(num_predictive_factors * 2, activation='relu',
+    mlp_2 = Dense(num_predictive_factors * 2, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_2')(mlp_1)
-    mlp_3 = Dense(num_predictive_factors, activation='relu',
+    mlp_3 = Dense(num_predictive_factors, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_3')(mlp_2)
-    main_output = Dense(6,
+    main_output = Dense(1,
                         # W_regularizer = l2(0.01),
-                        activation='softmax', init='lecun_uniform', name='main_output')(mlp_3)
+                        activation='elu', init='lecun_uniform', name='main_output')(mlp_3)
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)
     else:
@@ -58,9 +58,8 @@ def train_mlp(num_predictive_factors,batch_size, epochs, dimensions, inputs, lab
                                   num_predictive_factors=num_predictive_factors,
                                   pretrain=True)
     pretrain_model.compile(optimizer='Adam',
-                           loss='categorical_crossentropy',
+                           loss='mean_squared_error',
                            metrics=['accuracy'])
-    labels = keras.utils.to_categorical(labels, 6)
     pretrain_model.fit(inputs, labels, batch_size, epochs)
 
 
@@ -78,10 +77,10 @@ if __name__ == '__main__':
     try:
         dimensions = np.load('input/dimensions.npy')
     except IOError:
-        data_management.load_data(file_path='../data/yelp/yelp_pruned_20.dat',
-                                  review_file_path='input/docvecs.npy')
+        data_management_yelp.load_data(file_path='../data/yelp/yelp_pruned_20.dat',
+                                       review_file_path='input/docvecs.npy')
         dimensions = np.load('input/dimensions.npy')
-    inputs, labels = data_management.training_data_generation(fname='input/training_data.npy', reviews_input='input/docvecs.npy')
+    inputs, labels = data_management_yelp.training_data_generation(fname='input/training_data.npy', reviews_input='input/docvecs.npy')
     #data_management.load_data(file_path='../data/movielens/ratings.dat')
     train_mlp(num_predictive_factors=8, batch_size=256, epochs=2,
               dimensions=dimensions, inputs=inputs, labels=labels)

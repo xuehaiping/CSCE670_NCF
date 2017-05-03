@@ -35,8 +35,10 @@ for opt, arg in opts:
         batch_size = int(arg)
         print "Batch size is " + str(batch_size)
     elif opt in ("-e", "--epoch"):
+
         num_pretrain_epochs = int(arg)
-        print "number of traning epoch for pretrain and full model is " + str(num_pretrain_epochs)
+        print "number of training epochs for pretrain and full model is " + str(num_pretrain_epochs)
+
 
 num_final_epochs = num_pretrain_epochs
 
