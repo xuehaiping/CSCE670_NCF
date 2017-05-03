@@ -86,21 +86,21 @@ gmf = GMF.create_model(num_users=dimensions[0],
 gmf_output = gmf([user_input, item_input])
 
 # ----- Paragraph2Vec Model -----
-par2vec1 = Dense(num_predictive_factors * 4, activation='relu',
+par2vec1 = Dense(num_predictive_factors * 4, activation='elu',
               name='par2vec1')(review_input)
-par2vec2 = Dense(num_predictive_factors * 2, activation='relu',
+par2vec2 = Dense(num_predictive_factors * 2, activation='elu',
               name='par2vec2')(par2vec1)
-par2vec3 = Dense(num_predictive_factors, activation='relu',
+par2vec3 = Dense(num_predictive_factors, activation='elu',
               name='par2vec3')(par2vec2)
 
 # ----- Total Model -----
 gmf_mlp_par2vec_concatenated = concatenate([mlp_output, gmf_output,par2vec3], axis=1)
 NeuMF = Dense(num_predictive_factors * 3, activation='sigmoid', name='NeuMF')(gmf_mlp_par2vec_concatenated)
-NeuMF_main_output = Dense(1, activation='relu', name='NeuMF_main_output')(NeuMF)
+NeuMF_main_output = Dense(1, activation='elu', name='NeuMF_main_output')(NeuMF)
 model = Model(inputs=[user_input, item_input, review_input], output=NeuMF_main_output)
 
 model = load_weights(model)
-model.compile(optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True),
+model.compile(optimizer=keras.optimizers.SGD(lr=0.02, momentum=0.9, nesterov=True),
               loss='mean_squared_error',
               metrics=['accuracy'])
 model.fit(inputs, labels, batch_size=batch_size, epochs=num_final_epochs)

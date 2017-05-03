@@ -29,7 +29,7 @@ def create_model(num_users, num_items, num_predictive_factors, pretrain):
                                      embeddings_initializer=initializers.RandomNormal(mean=0.0, stddev=0.01,
                                                                                       seed=None))(item_input))
     GMF_merged_embed = multiply([user_embed, item_embed])
-    main_output = Dense(1, activation='relu', name='main_output')(GMF_merged_embed)
+    main_output = Dense(1, activation='elu', name='main_output')(GMF_merged_embed)
 
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)

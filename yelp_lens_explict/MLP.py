@@ -33,18 +33,18 @@ def create_model(num_users, num_items, num_predictive_factors,pretrain):
                                      embeddings_initializer=initializers.RandomNormal(mean=0.0, stddev=0.01,
                                                                                       seed=None))(item_input))
     merged_embed = concatenate([user_embed, item_embed], axis=1)
-    mlp_1 = Dense(num_predictive_factors * 4, activation='relu',
+    mlp_1 = Dense(num_predictive_factors * 4, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_1')(merged_embed)
-    mlp_2 = Dense(num_predictive_factors * 2, activation='relu',
+    mlp_2 = Dense(num_predictive_factors * 2, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_2')(mlp_1)
-    mlp_3 = Dense(num_predictive_factors, activation='relu',
+    mlp_3 = Dense(num_predictive_factors, activation='elu',
                   # W_regularizer = l2(0.01),
                   name='mlp_3')(mlp_2)
     main_output = Dense(1,
                         # W_regularizer = l2(0.01),
-                        activation='relu', init='lecun_uniform', name='main_output')(mlp_3)
+                        activation='elu', init='lecun_uniform', name='main_output')(mlp_3)
     if pretrain:
         model = Model(inputs=[user_input, item_input], output=main_output)
     else:
