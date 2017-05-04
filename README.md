@@ -10,7 +10,7 @@ Based on the paper: [Neural Collaborative Filtering][1]
 * Haiping Xue
 * Henry Qiu
 
-#### Presentation video: [TODO][2]
+#### [Presentation video][2]
 
 #### Data bases:
 * [Movie lens 1 million data set][3]
