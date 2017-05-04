@@ -21,7 +21,7 @@ The latest changes are mantained on the **master** branch
 * "**data**" Contains the data sets
 * "**movie_lens_explict**"	Contains the improved version of the NCF paper. Here we use explicit ratings
 * "**movie_lens_implict**"	Contains the built as the NCF paper states. Here we only consider user interaction with movies
-* "**yelp_lens_explict**" Contains the model that works with user ratings and user revies using doc2vec
+* "**yelp_explict**" Contains the model that works with user ratings and user revies using doc2vec
 
 
 #### General instructions
