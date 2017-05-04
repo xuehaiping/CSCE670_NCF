@@ -42,7 +42,7 @@ Once you have dedided the approach of you preference (implicit, explicit, yelp d
 **full_model.py** will train the GMF and MLP models, save its weights, feed them into the full model, train the full model, store the model for future references and finally, will load the testing data and feed it into the trained model. Right after, evaluation is performed over the predicted data.
 
 [1]: http://www.comp.nus.edu.sg/~xiangnan/papers/ncf.pdf "NCF"
-[2]: https://www.youtube.com "Video"
+[2]: https://www.youtube.com/watch?v=R9N8Xw3kvG8 "Video"
 [3]: https://grouplens.org/datasets/movielens/1m "Movie Lens"
 [4]: https://www.yelp.com/dataset_challenge "Yelp"
 [5]: https://keras.io/ "Keras"
