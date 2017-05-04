@@ -44,7 +44,7 @@ Once you have dedided the approach of you preference (implicit, explicit, yelp d
 [1]: http://www.comp.nus.edu.sg/~xiangnan/papers/ncf.pdf "NCF"
 [2]: https://www.youtube.com/watch?v=R9N8Xw3kvG8 "Video"
 [3]: https://grouplens.org/datasets/movielens/1m "Movie Lens"
-[4]: https://www.yelp.com/dataset_challenge "Yelp"
+[4]: https://drive.google.com/file/d/0B2y8ruyUvZyASm9QU0xTM2tRSUU/view?usp=sharing "Yelp"
 [5]: https://keras.io/ "Keras"
 [6]: https://www.tensorflow.org/ "Tensorflow"
 [7]: http://www.numpy.org/ "numpy"
